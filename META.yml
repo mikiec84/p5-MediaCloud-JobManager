@@ -7,6 +7,7 @@ abstract: Gearman job scheduler
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
+  repository: https://github.com/pypt/p5-Gearman-JobScheduler
 requires:
   Gearman::XS: 0,
   Data::Compare: 0,
