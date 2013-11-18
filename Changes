@@ -1,5 +1,11 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.10   2013-11-18
+    * Got rid of an outdated/experimental "given-when" syntax so Perl 5.18
+      doesn't complain.
+    * Dropped leading 'v' off versions to satisfy CPAN::Changes::Spec.
+    * Added GitHub repo to Build.PL / META.yml.
+
 0.09   2013-10-28
     * Make "unique_job_id()" public for the use of client applications because
       they might want to generate their own unique job IDs in order to test
