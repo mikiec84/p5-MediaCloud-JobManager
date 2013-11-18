@@ -553,11 +553,20 @@ sub run_on_gearman($;$$)
 
 	# Choose the client subroutine to use (based on the priority)
 	my $client_do_ref = undef;
-	given ($class->priority()) {
-		when(GJS_JOB_PRIORITY_LOW()) { $client_do_ref = sub { $client->do_low(@_) }; }
-		when(GJS_JOB_PRIORITY_NORMAL()) { $client_do_ref = sub { $client->do(@_) }; }
-		when(GJS_JOB_PRIORITY_HIGH()) { $client_do_ref = sub { $client->do_high(@_) }; }
-		default { die "Unknown job priority: " . $class->priority() }
+	my $class_priority = $class->priority();
+
+	if ($class_priority eq GJS_JOB_PRIORITY_LOW()) {
+		$client_do_ref = sub { $client->do_low(@_) };
+
+	} elsif ($class_priority eq GJS_JOB_PRIORITY_NORMAL()) {
+		$client_do_ref = sub { $client->do(@_) };
+
+	} elsif ($class_priority eq GJS_JOB_PRIORITY_HIGH()) {
+		$client_do_ref = sub { $client->do_high(@_) };
+
+	} else {
+		die "Unknown job priority: " . $class_priority;
+
 	}
 
 	# Client arguments
@@ -638,11 +647,20 @@ sub enqueue_on_gearman($;$$)
 
 	# Choose the client subroutine to use (based on the priority)
 	my $client_do_bg_ref = undef;
-	given ($class->priority()) {
-		when(GJS_JOB_PRIORITY_LOW()) { $client_do_bg_ref = sub { $client->do_low_background(@_) }; }
-		when(GJS_JOB_PRIORITY_NORMAL()) { $client_do_bg_ref = sub { $client->do_background(@_) }; }
-		when(GJS_JOB_PRIORITY_HIGH()) { $client_do_bg_ref = sub { $client->do_high_background(@_) }; }
-		default { die "Unknown job priority: " . $class->priority() }
+	my $class_priority = $class->priority();
+
+	if ($class_priority eq GJS_JOB_PRIORITY_LOW()) {
+		$client_do_bg_ref = sub { $client->do_low_background(@_) };
+
+	} elsif ($class_priority eq GJS_JOB_PRIORITY_NORMAL()) {
+		$client_do_bg_ref = sub { $client->do_background(@_) };
+
+	} elsif ($class_priority eq GJS_JOB_PRIORITY_HIGH()) {
+		$client_do_bg_ref = sub { $client->do_high_background(@_) };
+
+	} else {
+		die "Unknown job priority: " . $class_priority;
+
 	}
 
 	# Client arguments
