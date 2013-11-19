@@ -5,7 +5,7 @@ C<Gearman::JobScheduler> - Gearman job scheduler utilities.
 =cut
 package Gearman::JobScheduler;
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 use strict;
 use warnings;
@@ -24,7 +24,6 @@ use Storable qw(freeze thaw);
 $Storable::canonical = 1;
 
 use Data::UUID;
-use Sys::Path;
 use File::Path qw(make_path);
 
 use Digest::SHA qw(sha256_hex);

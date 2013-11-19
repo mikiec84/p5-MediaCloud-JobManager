@@ -10,7 +10,6 @@ use Modern::Perl "2012";
 
 use Moose 2.1005;
 use MooseX::Singleton;	# ->instance becomes available
-use Sys::Path;
 
 
 # Arrayref of default Gearman servers to connect to
@@ -24,8 +23,7 @@ has 'gearman_servers' => (
 has 'worker_log_dir' => (
 	is => 'rw',
 	isa => 'Str',
-	# Something like "/var/log/gjs/":
-	default => Sys::Path->logdir . '/gjs/'
+	default => '/var/log/gjs/'
 );
 
 # Default email address to send the email from

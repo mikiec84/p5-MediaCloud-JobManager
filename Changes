@@ -1,5 +1,10 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.11   2013-11-19
+    * Got rid of the Sys::Path dependency because it doesn't work on Perl 5.18
+      without warnings (requires JSON::Util -> IO::Any -> uses "~~" and "given"
+      which emit warnings).
+
 0.10   2013-11-18
     * Got rid of an outdated/experimental "given-when" syntax so Perl 5.18
       doesn't complain.

@@ -14,7 +14,6 @@ my $builder = Module::Build->new(
         'Data::Dumper' => 0,
         'Storable' => 0,
         'Data::UUID' => 0,
-        'Sys::Path' => 0,
         'File::Path' => 0,
         'Carp' => 0,
         'Email::MIME' => 0,
