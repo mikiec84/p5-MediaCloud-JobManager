@@ -387,9 +387,13 @@ sub run_locally($;$$$)
 
 	eval {
 
+		my $d = Data::Dumper->new([$args], ['args']);
+		$d->Indent(0);
+		my $str_arguments = $d->Dump;
+
 		say STDERR $starting_job_message;
 		say STDERR "========";
-		say STDERR "Arguments: " . Dumper($args);
+		say STDERR "Arguments: $str_arguments";
 		say STDERR "========";
 		say STDERR "";
 
