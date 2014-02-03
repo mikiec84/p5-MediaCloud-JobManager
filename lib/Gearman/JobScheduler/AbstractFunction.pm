@@ -153,7 +153,8 @@ sub unique()
 
 =head3 (static) C<notify_on_failure()>
 
-Return true if the client / worker should send error report by email when the function fails.
+Return true if the client / worker should send error report by email when the
+function fails.
 
 Returns true if the GJS client (in case C<run_locally()> is used) or worker
 (in case C<run_on_gearman()> or C<enqueue_on_gearman()> is being used) should
@@ -167,6 +168,26 @@ sub notify_on_failure()
 	# By default jobs will send notifications when they fail
 	return 1;
 }
+
+
+=head3 (static) C<unify_logs()>
+
+Return true if the worker should write logs of each of the jobs into a single
+file as opposed to writing into separate files.
+
+Returns true if GJS workers should write their job logs into a single file,
+i.e. into C<NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log> instead of
+C<NinetyNineBottlesOfBeer/gearman_job_id.gjs_job_id.log>.
+
+Default implementation of this subroutine returns "false".
+
+=cut
+sub unify_logs()
+{
+	# By default, write log of each job to a separate file
+	return 0;
+}
+
 
 
 =head3 (static) C<configuration()>
@@ -335,9 +356,9 @@ sub run_locally($;$$$)
 		die "Unable to determine unique GJS job ID";
 	}
 
-	my $log_path = Gearman::JobScheduler::_init_and_return_worker_log_dir($function_name, $config) . $gjs_job_id . '.log';
+	my $log_path = Gearman::JobScheduler::_worker_log_path($function_name, $gjs_job_id, $config);
 	my $starting_job_message;
-	if ( -f $log_path ) {
+	if ( -f $log_path and (! $function_name->unify_logs())) {
 		# Worker crashed last time and now tries to write to the same log path
 		# (will append to the log)
 		$starting_job_message = "Restarting job ID \"$gjs_job_id\", logging to \"$log_path\" ...";

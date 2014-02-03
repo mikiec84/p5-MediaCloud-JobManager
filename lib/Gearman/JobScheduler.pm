@@ -164,7 +164,8 @@ sub log_path_for_gearman_job($$;$)
 	# Sanitize the ID just like run_locally() would
 	$gearman_job_id = _sanitize_for_path($gearman_job_id);
 
-	my $log_path_glob = _init_and_return_worker_log_dir($function_name, $config) . $gearman_job_id . '*.log';
+	my $log_path_glob = _worker_log_path($function_name, $gearman_job_id, $config);
+	$log_path_glob =~ s/\.log$/\*\.log/;
 	my @log_paths = glob $log_path_glob;
 
 	if (scalar @log_paths == 0) {
@@ -364,6 +365,21 @@ sub _gearman_job_id_from_handle($)
 	}
 
 	return $gearman_job_id;
+}
+
+# (static) Return worker log path for the function name and GJS job ID
+sub _worker_log_path($$$)
+{
+	my ($function_name, $gearman_job_id, $config) = @_;
+
+	my $log_path = _init_and_return_worker_log_dir($function_name, $config);
+	if ($function_name->unify_logs()) {
+		$log_path .= $function_name . '.log';
+	} else {
+		$log_path .= $gearman_job_id . '.log';
+	}
+	
+	return $log_path;
 }
 
 # (static) Initialize (create missing directories) and return a worker log directory path (with trailing slash)
