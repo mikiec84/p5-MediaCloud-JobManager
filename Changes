@@ -1,5 +1,9 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.12   2014-02-03
+    * Added support for writing worker logs into a single file.
+    * Print job arguments into a single line for clarity.
+
 0.11   2013-11-19
     * Got rid of the Sys::Path dependency because it doesn't work on Perl 5.18
       without warnings (requires JSON::Util -> IO::Any -> uses "~~" and "given"
