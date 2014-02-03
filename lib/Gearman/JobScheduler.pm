@@ -5,7 +5,7 @@ C<Gearman::JobScheduler> - Gearman job scheduler utilities.
 =cut
 package Gearman::JobScheduler;
 
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 use strict;
 use warnings;
@@ -374,9 +374,9 @@ sub _worker_log_path($$$)
 
 	my $log_path = _init_and_return_worker_log_dir($function_name, $config);
 	if ($function_name->unify_logs()) {
-		$log_path .= $function_name . '.log';
+		$log_path .= _sanitize_for_path($function_name) . '.log';
 	} else {
-		$log_path .= $gearman_job_id . '.log';
+		$log_path .= _sanitize_for_path($gearman_job_id) . '.log';
 	}
 	
 	return $log_path;

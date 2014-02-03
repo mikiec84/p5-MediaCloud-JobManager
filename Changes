@@ -1,5 +1,8 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.13   2014-02-03
+    * Sanitize function name when writing to a single ("unified") log.
+
 0.12   2014-02-03
     * Added support for writing worker logs into a single file.
     * Print job arguments into a single line for clarity.
