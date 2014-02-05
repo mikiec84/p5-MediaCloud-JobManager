@@ -3,8 +3,6 @@
 `Gearman::JobScheduler::AbstractFunction` - An abstract class for a Gearman
 "function" which is to be derived by working Gearman "functions".
 
-
-
 # LINGO
 
 - Gearman function
@@ -35,7 +33,7 @@ An instance (object) of the class will be created before each run. Class
 instance variables (e.g. `$self->_my_variable`) will be discarded after
 each run.
 
-Returns result on success (serializable by the [Storable](http://search.cpan.org/perldoc?Storable) module). The result
+Returns result on success (serializable by the [Storable](https://metacpan.org/pod/Storable) module). The result
 will be discarded if the job is ordered on Gearman as a background process.
 
 Provides progress reports when available:
@@ -78,13 +76,37 @@ Default implementation of this subroutine returns "true".
 
 ### (static) `notify_on_failure()`
 
-Return true if the client / worker should send error report by email when the function fails.
+Return true if the client / worker should send error report by email when the
+function fails.
 
 Returns true if the GJS client (in case `run_locally()` is used) or worker
 (in case `run_on_gearman()` or `enqueue_on_gearman()` is being used) should
 send an email when the function fails to run.
 
 Default implementation of this subroutine returns "true".
+
+### (static) `unify_logs()`
+
+Return true if the worker should write logs of each of the jobs into a single
+file as opposed to writing into separate files.
+
+Returns true if GJS workers should write their job logs into a single file,
+i.e. into `NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log` instead of
+`NinetyNineBottlesOfBeer/gearman_job_id.gjs_job_id.log`.
+
+Default implementation of this subroutine returns "false".
+
+### (static) `configuration()`
+
+Return an instance or a subclass of `Gearman::JobScheduler::Configuration` to
+be used as default configuration by both workers and clients.
+
+Workers and clients will still be able to override this configuration by
+passing their own `config` argument. This configuration will be used if no
+such argument is present.
+
+Default implementation of this subroutine returns an instance of
+`Gearman::JobScheduler::Configuration` (default configuration).
 
 ### (static) `priority()`
 
@@ -130,7 +152,7 @@ Run locally and right away, blocking the parent process until it gets finished.
 Parameters:
 
 - (optional) `$args` (hashref), arguments required for running the
-Gearman function  (serializable by the [Storable](http://search.cpan.org/perldoc?Storable) module)
+Gearman function  (serializable by the [Storable](https://metacpan.org/pod/Storable) module)
 - (optional) instance of Gearman::JobScheduler::Configuration to be used by the worker
 - (optional, internal) instance of Gearman::XS::Job to be later used by
 send\_progress()
@@ -145,7 +167,7 @@ process until the job is complete.
 Parameters:
 
 - (optional) `$args` (hashref), arguments needed for running the Gearman
-function (serializable by the [Storable](http://search.cpan.org/perldoc?Storable) module)
+function (serializable by the [Storable](https://metacpan.org/pod/Storable) module)
 - (optional) Instance of Gearman::JobScheduler::Configuration to be used by the client.
 
 Returns result (may be false of `undef`) on success, `die()`s on error
@@ -158,11 +180,23 @@ do not block the parent process until the job is complete.
 Parameters:
 
 - (optional) `$args` (hashref), arguments needed for running the Gearman
-function (serializable by the [Storable](http://search.cpan.org/perldoc?Storable) module)
+function (serializable by the [Storable](https://metacpan.org/pod/Storable) module)
 - (optional) Instance of Gearman::JobScheduler::Configuration to be used by the client.
 
 Returns Gearman-provided string job identifier (Gearman job ID) if the job was
 enqueued successfully, `die()`s on error.
+
+## (static) `name()`
+
+Returns a Gearman function's name (e.g. `NinetyNineBottlesOfBeer`).
+
+Usage:
+
+        NinetyNineBottlesOfBeer->name();
+
+Parameters:
+
+- Class or class instance
 
 # TODO
 
@@ -170,4 +204,3 @@ enqueued successfully, `die()`s on error.
 - test timeout
 - store Gearman queue in PostgreSQL?
 - unit tests
-- remove the requirement to pass a function name parameter to log\_path\_for\_gearman\_job()
