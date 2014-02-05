@@ -1,5 +1,11 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.14   2014-02-05
+    * Remove fork()-based workers because they're more of a bug than a feature;
+      clients should run separate processes instead.
+    * Use JSON instead of Storable to encode / decode job arguments in order to
+      improve compatibility with Gearman clients / workers in other languages.
+
 0.13   2014-02-03
     * Sanitize function name when writing to a single ("unified") log.
 
