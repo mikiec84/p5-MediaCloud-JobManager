@@ -14,12 +14,6 @@ use Gearman::JobScheduler::Configuration;
 use Gearman::XS qw(:constants);
 use Gearman::XS::Worker;
 
-use Parallel::ForkManager;
-
-use Data::Dumper;
-
-use constant PM_MAX_PROCESSES => 64;
-
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init({ level => $DEBUG, utf8=>1, layout => "%d{ISO8601} [%P]: %m%n" });
 
@@ -59,14 +53,12 @@ sub import_gearman_function($)
 
 
 # Run a single worker (it should be imported already)
-sub _worker($;$)
+sub _worker($)
 {
-	my ($gearman_function_name, $number_of_instances) = @_;
-	$number_of_instances ||= 1;
+	my ($gearman_function_name) = @_;
 
 	my $config = $gearman_function_name->configuration();
 
-	INFO("Number of instances: $number_of_instances");
 	INFO("Will use Gearman servers: " . join(' ', @{$config->gearman_servers}));
 	INFO("Will write logs to: " . $config->worker_log_dir);
 	if (scalar @{$config->notifications_emails}) {
@@ -123,70 +115,17 @@ sub _worker($;$)
 }
 
 
-# Run all workers
-sub run_worker($;$)
+# Run worker
+sub run_worker($)
 {
-	my ($gearman_function_name_or_path, $number_of_instances) = @_;
-	$number_of_instances ||= 1;
-
-	if ($number_of_instances > PM_MAX_PROCESSES) {
-		LOGDIE("Too many instances to be started.");
-	}
-
-	my $pm = Parallel::ForkManager->new(PM_MAX_PROCESSES);
+	my ($gearman_function_name_or_path) = @_;
 
 	my $gearman_function_name = import_gearman_function($gearman_function_name_or_path);
-	INFO("Initializing with Gearman function '$gearman_function_name' from '$gearman_function_name_or_path'.");
 
-	for (my $instance = 1; $instance <= $number_of_instances; ++$instance)
-	{
-		$pm->start($gearman_function_name . '-' . $instance) and next;	# do the fork
+	INFO("Starting Gearman function '$gearman_function_name' from '$gearman_function_name_or_path'.");
+	_worker($gearman_function_name);
 
-		INFO("Starting instance $instance");
-		_worker($gearman_function_name, $number_of_instances);
-
-		$pm->finish; # do the exit in the child process
-	}
-
-	INFO("All instances ready.");
-	$pm->wait_all_children;
-}
-
-
-# Run all workers
-sub run_all_workers($;$)
-{
-	my ($gearman_functions_directory, $number_of_instances) = @_;
-	$number_of_instances ||= 1;
-
-	# Run all workers
-	INFO("Initializing with all functions from directory '$gearman_functions_directory'.");
-	my @function_modules = glob $gearman_functions_directory . '/*.pm';
-	if ((scalar @function_modules * $number_of_instances) > PM_MAX_PROCESSES) {
-		LOGDIE("Too many workers to be started.");
-	}
-
-	my $pm = Parallel::ForkManager->new(PM_MAX_PROCESSES);
-
-	foreach my $gearman_function_name_or_path (@function_modules) {
-
-		my $gearman_function_name = import_gearman_function($gearman_function_name_or_path);
-		INFO("Initializing with Gearman function '$gearman_function_name' from '$gearman_function_name_or_path'.");
-
-		for (my $instance = 1; $instance <= $number_of_instances; ++$instance)
-		{
-			$pm->start($gearman_function_name . '-' . $instance) and next;	# do the fork
-
-			INFO("Starting instance $instance");
-			_worker($gearman_function_name, $number_of_instances);
-
-			$pm->finish; # do the exit in the child process
-		}
-
-	}
-
-	INFO("All workers ready.");
-	$pm->wait_all_children;
+	INFO("Done.");
 }
 
 
