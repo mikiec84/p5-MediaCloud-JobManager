@@ -76,7 +76,7 @@ An instance (object) of the class will be created before each run. Class
 instance variables (e.g. C<$self-E<gt>_my_variable>) will be discarded after
 each run.
 
-Returns result on success (serializable by the L<Storable> module). The result
+Returns result on success (serializable by the L<JSON> module). The result
 will be discarded if the job is ordered on Gearman as a background process.
 
 Provides progress reports when available:
@@ -304,7 +304,7 @@ Parameters:
 =over 4
 
 =item * (optional) C<$args> (hashref), arguments required for running the
-Gearman function  (serializable by the L<Storable> module)
+Gearman function  (serializable by the L<JSON> module)
 
 =item * (optional) instance of Gearman::JobScheduler::Configuration to be used by the worker
 
@@ -539,7 +539,7 @@ Parameters:
 =over 4
 
 =item * (optional) C<$args> (hashref), arguments needed for running the Gearman
-function (serializable by the L<Storable> module)
+function (serializable by the L<JSON> module)
 
 =item * (optional) Instance of Gearman::JobScheduler::Configuration to be used by the client.
 
@@ -632,7 +632,7 @@ Parameters:
 =over 4
 
 =item * (optional) C<$args> (hashref), arguments needed for running the Gearman
-function (serializable by the L<Storable> module)
+function (serializable by the L<JSON> module)
 
 =item * (optional) Instance of Gearman::JobScheduler::Configuration to be used by the client.
 

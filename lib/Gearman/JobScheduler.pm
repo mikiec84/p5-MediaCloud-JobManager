@@ -19,9 +19,10 @@ use Gearman::XS::Client;
 # Hashref serializing / unserializing
 use Data::Compare;
 use Data::Dumper;
-use Storable qw(freeze thaw);
+
+use JSON;
 # serialize hashes with the same key order:
-$Storable::canonical = 1;
+my $json = JSON->new->allow_nonref->canonical->utf8;
 
 use Data::UUID;
 use File::Path qw(make_path);
@@ -408,7 +409,7 @@ sub _init_and_return_worker_log_dir($$)
 # Serialize a hashref into string (to be passed to Gearman)
 #
 # Parameters:
-# * hashref that is serializable by Storable module (may be undef)
+# * hashref that is serializable by JSON module (may be undef)
 #
 # Returns:
 # * a string (string is empty if the hashref is undef)
@@ -430,10 +431,10 @@ sub _serialize_hashref($)
 	my $hashref_serialized = undef;
 	eval {
 		
-		$hashref_serialized = freeze $hashref;
+		$hashref_serialized = $json->encode( $hashref );
 		
 		# Try to deserialize, see if we get the same hashref
-		my $hashref_deserialized = thaw($hashref_serialized);
+		my $hashref_deserialized = $json->decode($hashref_serialized);
 		unless (Compare($hashref, $hashref_deserialized)) {
 
 			my $error = "Serialized and deserialized hashrefs differ.\n";
@@ -445,7 +446,7 @@ sub _serialize_hashref($)
 	};
 	if ($@)
 	{
-		LOGDIE("Unable to serialize hashref with the Storable module: $@");
+		LOGDIE("Unable to serialize hashref with the JSON module: $@");
 	}
 
 	return $hashref_serialized;
@@ -473,7 +474,7 @@ sub _unserialize_hashref($)
 	eval {
 		
 		# Unserialize
-		$hashref = thaw($string);
+		$hashref = $json->decode($string);
 
 		unless (defined $hashref) {
 			LOGDIE("Unserialized hashref is undefined.");
@@ -486,7 +487,7 @@ sub _unserialize_hashref($)
 	};
 	if ($@)
 	{
-		LOGDIE("Unable to unserialize string '$string' with the Storable module: $@");
+		LOGDIE("Unable to unserialize string '$string' with the JSON module: $@");
 	}
 
 	return $hashref;

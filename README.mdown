@@ -33,7 +33,7 @@ An instance (object) of the class will be created before each run. Class
 instance variables (e.g. `$self->_my_variable`) will be discarded after
 each run.
 
-Returns result on success (serializable by the [Storable](https://metacpan.org/pod/Storable) module). The result
+Returns result on success (serializable by the [JSON](https://metacpan.org/pod/JSON) module). The result
 will be discarded if the job is ordered on Gearman as a background process.
 
 Provides progress reports when available:
@@ -152,7 +152,7 @@ Run locally and right away, blocking the parent process until it gets finished.
 Parameters:
 
 - (optional) `$args` (hashref), arguments required for running the
-Gearman function  (serializable by the [Storable](https://metacpan.org/pod/Storable) module)
+Gearman function  (serializable by the [JSON](https://metacpan.org/pod/JSON) module)
 - (optional) instance of Gearman::JobScheduler::Configuration to be used by the worker
 - (optional, internal) instance of Gearman::XS::Job to be later used by
 send\_progress()
@@ -167,7 +167,7 @@ process until the job is complete.
 Parameters:
 
 - (optional) `$args` (hashref), arguments needed for running the Gearman
-function (serializable by the [Storable](https://metacpan.org/pod/Storable) module)
+function (serializable by the [JSON](https://metacpan.org/pod/JSON) module)
 - (optional) Instance of Gearman::JobScheduler::Configuration to be used by the client.
 
 Returns result (may be false of `undef`) on success, `die()`s on error
@@ -180,7 +180,7 @@ do not block the parent process until the job is complete.
 Parameters:
 
 - (optional) `$args` (hashref), arguments needed for running the Gearman
-function (serializable by the [Storable](https://metacpan.org/pod/Storable) module)
+function (serializable by the [JSON](https://metacpan.org/pod/JSON) module)
 - (optional) Instance of Gearman::JobScheduler::Configuration to be used by the client.
 
 Returns Gearman-provided string job identifier (Gearman job ID) if the job was
