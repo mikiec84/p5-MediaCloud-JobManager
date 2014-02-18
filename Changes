@@ -1,5 +1,10 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.15   2014-02-18
+    * Add FILENO() subroutine to Gearman::JobScheduler::ErrorLogTrapper because
+      otherwise IPC::Open3 fails (see
+      http://stackoverflow.com/a/6012757/200603).
+
 0.14   2014-02-05
     * Remove fork()-based workers because they're more of a bug than a feature;
       clients should run separate processes instead.

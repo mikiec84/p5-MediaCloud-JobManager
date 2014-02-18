@@ -21,4 +21,8 @@ sub PRINT {
 	$Log::Log4perl::caller_depth--;
 }
 
+sub FILENO {
+	return undef;
+}
+
 1;
