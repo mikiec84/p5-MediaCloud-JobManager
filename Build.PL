@@ -41,7 +41,7 @@ my $builder = Module::Build->new(
         "script/gjs_worker.pl"
     ],
     add_to_cleanup =>
-        [ 'Gearman-JobScheduler-*', 'MANIFEST.bak', 'Makefile' ],
+        [ 'Gearman-JobScheduler-*', 'MANIFEST.bak', 'MANIFEST.SKIP.bak', 'Makefile', 'MYMETA.*', '_build' ],
     create_makefile_pl => 'passthrough',
     meta_merge => {
         resources => {
