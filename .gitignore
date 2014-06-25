@@ -11,4 +11,6 @@ Makefile
 MYMETA.yml
 MYMETA.json
 Build
+MANIFEST.bak
+MANIFEST.SKIP.bak
 
