@@ -30,6 +30,8 @@ my $builder = Module::Build->new(
         'File::ReadBackwards' => 0,
         'Readonly' => 0,
         'Sys::Hostname' => 0,
+        'Test::Strict' => 0,
+        'Test::NoWarnings' => 0,
         'Test::More' => 0,
         'perl'       => '5.12.0',
     },

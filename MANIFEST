@@ -17,3 +17,4 @@ samples/NinetyNineBottlesOfBeer.pm
 script/gjs_sample_client.pl
 script/gjs_update_readme.sh
 script/gjs_worker.pl
+t/compile.t
