@@ -199,10 +199,10 @@ sub unique_job_id($$)
 	}
 
 	# Convert to string
-	$job_args = ($job_args and scalar keys $job_args)
+	$job_args = ($job_args and scalar keys %{ $job_args })
 		? join(', ', map {
 			$_ . ' = ' . ($job_args->{$_} // 'undef')
-		} sort(keys $job_args))
+		} sort(keys %{ $job_args }))
 		: '';
 	my $unique_id = "$function_name($job_args)";
 
