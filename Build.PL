@@ -27,6 +27,7 @@ my $builder = Module::Build->new(
         'Moose' => '2.1005',
         'Moose::Role' => '2.1005',
         'MooseX::Singleton' => 0,
+        'Net::Telnet' => 0,
         'Readonly' => 0,
         'Sys::Hostname' => 0,
         'Test::More' => 0,
