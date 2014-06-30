@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pypt/p5-Gearman-JobScheduler.svg?branch=master)](https://travis-ci.org/pypt/p5-Gearman-JobScheduler)
+
 # NAME
 
 `Gearman::JobScheduler::AbstractFunction` - An abstract class for a Gearman
