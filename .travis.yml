@@ -3,9 +3,6 @@ perl:
     - "5.16"
     - "5.18"
     - "5.19"
-before_install:
-    - sudo apt-get -y update
-    - sudo apt-get -y upgrade
 install:
     # Apt's version of Gearman is too old
     - sudo apt-get -y remove gearman gearman-job-server gearman-tools libgearman-dbg libgearman-dev libgearman-doc libgearman6
