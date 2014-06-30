@@ -7,7 +7,6 @@ before_install:
     - sudo apt-get -y update
     - sudo apt-get -y upgrade
 install:
-    - sudo apt-get -y install openjdk-7-jdk maven
     - cpanm --verbose --installdeps .
 script:
     - perl Makefile.PL
