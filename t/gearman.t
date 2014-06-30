@@ -2,7 +2,6 @@ use strict;
 use warnings;
 
 use Test::More;
-use Net::EmptyPort qw(empty_port check_port);
 use Proc::Background;
 
 unless (system( 'gearmand --version' ) == 0) {
