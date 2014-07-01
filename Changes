@@ -1,5 +1,13 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.16   2014-07-01
+    * Fix support for Perl 5.19+.
+    * Remove support for "timeout()" subroutine because it wasn't working as
+      expected.
+    * Add basic, sanity checking unit tests.
+    * Add compile test.
+    * Fix list of module dependencies.
+
 0.15   2014-02-18
     * Add FILENO() subroutine to Gearman::JobScheduler::ErrorLogTrapper because
       otherwise IPC::Open3 fails (see
