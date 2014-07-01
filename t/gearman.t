@@ -4,6 +4,8 @@ use warnings;
 use Test::More;
 use Proc::Background;
 use IO::Socket::INET;
+use File::Temp;
+use File::Slurp;
 
 
 sub _gearmand_is_installed()
@@ -30,7 +32,7 @@ sub _gearmand_is_started()
 unless ( _gearmand_is_installed() and _gearmand_is_started() ) {
     plan skip_all => "'gearmand' is not installed or not started";
 } else {
-    plan tests => 17;
+    plan tests => 27;
 }
 
 use lib qw|lib/ t/lib/|;
@@ -46,6 +48,7 @@ use_ok( 'Gearman::JobScheduler::Worker' );
 use_ok( 'ReverseStringWorker' );
 use_ok( 'FailsAlwaysWorker' );
 use_ok( 'FailsOnceWorker' );
+use_ok( 'FailsOnceWillRetryWorker' );
 
 
 sub _worker_process($)
@@ -127,11 +130,58 @@ sub test_run_on_gearman()
     }
 }
 
+sub test_enqueue_on_gearman()
+{
+    my $tempdir = File::Temp::tempdir();
+
+    say STDERR "Tempdir: $tempdir";
+    ok( -d $tempdir, 'Temporary directory exists' );
+
+    my $proc_1 = _worker_process( 'ReverseStringWorker');
+    my $proc_2 = _worker_process( 'FailsOnceWillRetryWorker');
+
+    {
+        my $write_results_to = $tempdir . '/ReverseStringWorker.txt';
+        ok( ! -f $write_results_to, 'enqueue_on_gearman() ReverseStringWorker result file does not exist' );
+
+        my $string = 'Hello World!';
+        my $started = ReverseStringWorker->enqueue_on_gearman({
+            'string' => $string,
+            'write_results_to' => $write_results_to
+        });
+        ok( $started, 'enqueue_on_gearman() ReverseStringWorker job enqueued' );
+
+        # Wait for the worker to complete the job
+        sleep( 2 );
+
+        ok( -f $write_results_to, 'enqueue_on_gearman() ReverseStringWorker result file exists' );
+        is( read_file( $write_results_to ), reverse( $string ), 'enqueue_on_gearman() ReverseStringWorker result string matches' );
+    }
+
+    {
+        my $write_results_to = $tempdir . '/FailsOnceWillRetryWorker.txt';
+        ok( ! -f $write_results_to, 'enqueue_on_gearman() FailsOnceWillRetryWorker result file does not exist' );
+
+        my $started = FailsOnceWillRetryWorker->enqueue_on_gearman({
+            'write_results_to' => $write_results_to
+        });
+        ok( $started, 'enqueue_on_gearman() FailsOnceWillRetryWorker job enqueued' );
+
+        # Wait for worker to fail, restart and complete the job
+        sleep( 2 );
+
+        ok( -f $write_results_to, 'enqueue_on_gearman() FailsOnceWillRetryWorker result file exists' );
+        is( read_file( $write_results_to ), 42, 'enqueue_on_gearman() FailsOnceWillRetryWorker result string matches' );
+    }
+
+}
+
 
 sub main()
 {
     test_run_locally();
     test_run_on_gearman();
+    test_enqueue_on_gearman();
 }
 
 main();

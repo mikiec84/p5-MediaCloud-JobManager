@@ -19,6 +19,8 @@ requires:
   Email::Sender::Simple: 0,
   File::Path: 0,
   File::ReadBackwards: 0,
+  File::Slurp: 0,
+  File::Temp: 0,
   Gearman::XS: 0,
   IO::File: 0,
   IO::Socket::INET: 0,

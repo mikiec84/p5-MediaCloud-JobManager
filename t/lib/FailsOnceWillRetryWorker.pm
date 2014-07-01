@@ -1,4 +1,4 @@
-package FailsOnceWorker;
+package FailsOnceWillRetryWorker;
 
 use strict;
 use warnings;
@@ -33,6 +33,11 @@ sub run($;$)
         $second_run = 1;
         die "It's the first time I'm being run, so I'm failing.";
     }
+}
+
+sub retries()
+{
+    return 3;
 }
 
 no Moose;    # gets rid of scaffolding
