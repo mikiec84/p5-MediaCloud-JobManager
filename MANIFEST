@@ -20,5 +20,6 @@ script/gjs_worker.pl
 t/compile.t
 t/gearman.t
 t/lib/FailsAlwaysWorker.pm
+t/lib/FailsOnceWillRetryWorker.pm
 t/lib/FailsOnceWorker.pm
 t/lib/ReverseStringWorker.pm
