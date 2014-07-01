@@ -13,6 +13,9 @@ install:
     - sudo apt-get -y install gearman-job-server gearman-tools libgearman-dev
     # Install Perl dependencies
     - cpanm --verbose --installdeps .
+before_script:
+    - sudo mkdir /var/log/gjs
+    - sudo chown travis /var/log/gjs
 script:
     - perl Makefile.PL
     - make
