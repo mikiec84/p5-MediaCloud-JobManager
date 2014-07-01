@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::NoWarnings;
 use Proc::Background;
 use IO::Socket::INET;
 use File::Temp;
@@ -32,7 +33,7 @@ sub _gearmand_is_started()
 unless ( _gearmand_is_installed() and _gearmand_is_started() ) {
     plan skip_all => "'gearmand' is not installed or not started";
 } else {
-    plan tests => 27;
+    plan tests => 27 + 1;
 }
 
 use lib qw|lib/ t/lib/|;
