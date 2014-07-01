@@ -21,6 +21,7 @@ my $builder = Module::Build->new(
         'File::ReadBackwards' => 0,
         'Gearman::XS' => 0,
         'IO::File' => 0,
+        'IO::Socket::INET' => 0,
         'JSON' => 0,
         'Log::Log4perl' => 0,
         'Modern::Perl' => 0,
