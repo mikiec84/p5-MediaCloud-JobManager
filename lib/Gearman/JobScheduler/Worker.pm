@@ -81,7 +81,7 @@ sub _worker($)
 
 	$ret = $worker->add_function(
 		$gearman_function_name,
-		$gearman_function_name->timeout() * 1000,	# in milliseconds
+		0,
 		sub {
 			my ($gearman_job) = shift;
 

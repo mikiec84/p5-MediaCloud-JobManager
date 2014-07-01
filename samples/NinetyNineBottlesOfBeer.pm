@@ -45,14 +45,6 @@ sub run($;$)
 }
 
 
-# Return individual job's timeout (0 for no timeout)
-sub timeout()
-{
-	# No timeout
-	return 0;
-}
-
-
 # Return a number of retries (0 for no retries)
 sub retries()
 {

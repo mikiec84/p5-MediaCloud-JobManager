@@ -95,24 +95,6 @@ Writes log to C<STDOUT> or C<STDERR> (preferably the latter).
 requires 'run';
 
 
-=head2 OPTIONAL
-
-=head3 (static) C<timeout()>
-
-Return the timeout of each job.
-
-Returns the timeout (in seconds) of each job or 0 if there's no timeout.
-
-Default implementation of this subroutine returns 0 (no timeout).
-
-=cut
-sub timeout()
-{
-	# By default, individual job never times out
-	return 0;
-}
-
-
 =head3 (static) C<retries()>
 
 Return the number of retries for each job.
@@ -569,7 +551,6 @@ sub run_on_gearman($;$$)
 		die "Unable to determine function name.";
 	}
 
-	# Run
 	my $args_serialized = Gearman::JobScheduler::_serialize_hashref($args);
 
 	# Gearman::XS::Client seems to not like undefined or empty workload()
@@ -663,7 +644,6 @@ sub enqueue_on_gearman($;$$)
 		die "Unable to determine function name.";
 	}
 
-	# Add task
 	my $args_serialized = Gearman::JobScheduler::_serialize_hashref($args);
 
 	# Gearman::XS::Client seems to not like undefined or empty workload()
@@ -805,7 +785,5 @@ no Moose;    # gets rid of scaffolding
 =over 4
 
 =item * code formatting
-
-=item * test timeout
 
 =back
