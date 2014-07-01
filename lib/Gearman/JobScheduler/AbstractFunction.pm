@@ -808,8 +808,4 @@ no Moose;    # gets rid of scaffolding
 
 =item * test timeout
 
-=item * store Gearman queue in PostgreSQL?
-
-=item * unit tests
-
 =back

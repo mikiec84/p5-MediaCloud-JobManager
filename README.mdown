@@ -204,5 +204,3 @@ Parameters:
 
 - code formatting
 - test timeout
-- store Gearman queue in PostgreSQL?
-- unit tests
