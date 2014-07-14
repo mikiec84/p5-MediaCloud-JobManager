@@ -28,3 +28,6 @@
 \bGearman-JobScheduler-[\d\.\_]+
 ^MYMETA\.yml$
 ^MYMETA\.json$
+
+# Avoid Devel::Cover output
+cover_db
