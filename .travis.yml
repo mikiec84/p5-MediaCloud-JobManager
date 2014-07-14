@@ -3,6 +3,9 @@ perl:
     - "5.16"
     - "5.18"
     - "5.19"
+before_install:
+    # Install test coverage reporting tool
+    - cpanm --verbose Devel::Cover::Report::Coveralls
 install:
     # Apt's version of Gearman is too old
     - sudo apt-get -y remove gearman gearman-job-server gearman-tools libgearman-dbg libgearman-dev libgearman-doc libgearman6
@@ -19,5 +22,5 @@ before_script:
 script:
     - perl Makefile.PL
     - make
-    - make test
+    - cover -test -report coveralls
     - make install
