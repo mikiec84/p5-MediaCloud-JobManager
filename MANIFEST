@@ -22,4 +22,5 @@ t/gearman.t
 t/lib/FailsAlwaysWorker.pm
 t/lib/FailsOnceWillRetryWorker.pm
 t/lib/FailsOnceWorker.pm
+t/lib/helpers.inc.pl
 t/lib/ReverseStringWorker.pm
