@@ -28,7 +28,7 @@ before_install:
     - travis_retry cpanm Devel::Cover::Report::Coveralls
 install:
     # Install Perl dependencies
-    - travis_retry cpanm --installdeps .
+    - travis_retry cpanm --installdeps --notest .
 script:
     - perl Makefile.PL
     - make
