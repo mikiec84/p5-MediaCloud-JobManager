@@ -1,5 +1,3 @@
-.perltidyrc
-.podtidy-opts
 Build.PL
 Changes
 lib/Gearman/JobScheduler.pm

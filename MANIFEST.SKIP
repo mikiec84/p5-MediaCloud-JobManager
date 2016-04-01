@@ -1,5 +1,7 @@
 .git
 .travis.yml
+.perltidyrc
+.podtidy-opts
 
 # OS X
 \.DS_Store
