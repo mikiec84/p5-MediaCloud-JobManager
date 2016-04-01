@@ -7,17 +7,22 @@ perl:
 addons:
     hosts:
         - jobscheduler.local
+    apt:
+        # Whitelist: https://github.com/travis-ci/apt-source-whitelist
+        sources:
+            # We need an up-to-date version of Gearman
+            - gearman-developers
+        # Whitelist: https://github.com/travis-ci/apt-package-whitelist
+        packages:
+            - gearman
+            - gearman-job-server
+            - gearman-tools
+            - libgearman-dev
+            - libgearman7
 before_install:
     # Install test coverage reporting tool
     - cpanm Devel::Cover::Report::Coveralls
 install:
-    # Apt's version of Gearman is too old
-    - sudo apt-get -y remove gearman gearman-job-server gearman-tools libgearman-dbg libgearman-dev libgearman-doc libgearman6
-    # Install Gearman from PPA repository
-    - sudo apt-get -y install python-software-properties
-    - sudo add-apt-repository -y ppa:gearman-developers/ppa
-    - sudo apt-get -y update
-    - sudo apt-get -y install gearman-job-server gearman-tools libgearman-dev
     # Install Perl dependencies
     - cpanm --installdeps .
 before_script:
