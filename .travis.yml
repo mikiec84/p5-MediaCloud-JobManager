@@ -4,6 +4,9 @@ language: perl
 sudo: false
 perl:
     - "5.22"
+addons:
+    hosts:
+        - jobscheduler.local
 before_install:
     # Install test coverage reporting tool
     - cpanm Devel::Cover::Report::Coveralls
