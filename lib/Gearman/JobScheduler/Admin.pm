@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 C<Gearman::JobScheduler::Admin> - Gearman administration utilities.
@@ -7,6 +8,7 @@ Reimplements functionality of "gearadmin"
 in Perl.
 
 =cut
+
 package Gearman::JobScheduler::Admin;
 
 use strict;
@@ -23,7 +25,6 @@ use Net::Telnet;
 
 # Connection timeout
 use constant GJS_ADMIN_TIMEOUT => 10;
-
 
 =head2 (static) C<server_version($config)>
 
@@ -51,30 +52,33 @@ Returns hashref of configured servers and their versions, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub server_version($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	my $versions = {};
+    my $versions = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $version = server_version_on_server($server);
-		unless (defined $version) {
-			say STDERR "Unable to determine version of server $server.";
-			return undef;
-		}
+        my $version = server_version_on_server( $server );
+        unless ( defined $version )
+        {
+            say STDERR "Unable to determine version of server $server.";
+            return undef;
+        }
 
-		$versions->{ $server } = $version;
-	}
+        $versions->{ $server } = $version;
+    }
 
-	return $versions;
+    return $versions;
 }
-
 
 =head2 (static) C<server_version_on_server($server)>
 
@@ -93,30 +97,32 @@ Returns a string server version, e.g. '1.1.9'.
 Returns C<undef> on error.
 
 =cut
+
 sub server_version_on_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('version');
-	my $version = $telnet->getline();
-	chomp $version;
+    $telnet->print( 'version' );
+    my $version = $telnet->getline();
+    chomp $version;
 
-	unless ($version =~ /^OK /) {
-		say STDERR "Server $server didn't respond with 'OK': $version";
-		return undef;
-	}
+    unless ( $version =~ /^OK / )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $version";
+        return undef;
+    }
 
-	$version =~ s/^OK //;
-	unless ($version) {
-		say STDERR "Version string is empty.";
-		return undef;
-	}
+    $version =~ s/^OK //;
+    unless ( $version )
+    {
+        say STDERR "Version string is empty.";
+        return undef;
+    }
 
-	return $version;
+    return $version;
 }
-
 
 =head2 (static) C<server_verbose($config)>
 
@@ -166,30 +172,33 @@ Available verbosity levels:
 Returns C<undef> on error.
 
 =cut
+
 sub server_verbose($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	my $verbose_levels = {};
+    my $verbose_levels = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $verbose = server_verbose_on_server($server);
-		unless (defined $verbose) {
-			say STDERR "Unable to determine verbosity level of server $server.";
-			return undef;
-		}
+        my $verbose = server_verbose_on_server( $server );
+        unless ( defined $verbose )
+        {
+            say STDERR "Unable to determine verbosity level of server $server.";
+            return undef;
+        }
 
-		$verbose_levels->{ $server } = $verbose;
-	}
+        $verbose_levels->{ $server } = $verbose;
+    }
 
-	return $verbose_levels;
+    return $verbose_levels;
 }
-
 
 =head2 (static) C<server_verbose_on_server($server)>
 
@@ -208,30 +217,32 @@ Returns string verbose setting (see C<server_verbose> for possible values).
 Returns C<undef> on error.
 
 =cut
+
 sub server_verbose_on_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('verbose');
-	my $verbose = $telnet->getline();
-	chomp $verbose;
+    $telnet->print( 'verbose' );
+    my $verbose = $telnet->getline();
+    chomp $verbose;
 
-	unless ($verbose =~ /^OK /) {
-		say STDERR "Server $server didn't respond with 'OK': $verbose";
-		return undef;
-	}
+    unless ( $verbose =~ /^OK / )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $verbose";
+        return undef;
+    }
 
-	$verbose =~ s/^OK //;
-	unless ($verbose) {
-		say STDERR "Verbose string is empty.";
-		return undef;
-	}
+    $verbose =~ s/^OK //;
+    unless ( $verbose )
+    {
+        say STDERR "Verbose string is empty.";
+        return undef;
+    }
 
-	return $verbose;
+    return $verbose;
 }
-
 
 =head2 (static) C<create_function($function_name, $config)>
 
@@ -250,26 +261,29 @@ Parameters:
 Returns true (1) if the function has been created, false (C<undef>) on error.
 
 =cut
+
 sub create_function($$)
 {
-	my ($function_name, $config) = @_;
+    my ( $function_name, $config ) = @_;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $result = create_function_on_server($function_name, $server);
-		unless ($result) {
-			say STDERR "Unable to create function '$function_name' on server $server.";
-			return undef;
-		}
-	}
+        my $result = create_function_on_server( $function_name, $server );
+        unless ( $result )
+        {
+            say STDERR "Unable to create function '$function_name' on server $server.";
+            return undef;
+        }
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<create_function_on_server($function_name, $server)>
 
@@ -288,33 +302,36 @@ Parameters:
 Returns true (1) if the function has been created, false (C<undef>) on error.
 
 =cut
+
 sub create_function_on_server($$)
 {
-	my ($function_name, $server) = @_;
+    my ( $function_name, $server ) = @_;
 
-	unless ($function_name) {
-		say STDERR "Function name can't be empty (Gearman would allow that, but I don't)";
-		return undef;
-	}
-	if ($function_name =~ /\n/ or $function_name =~ /\r/ or $function_name =~ /\s/) {
-		say STDERR "Function name can't contain line breaks or whitespace";
-		return undef;
-	}
+    unless ( $function_name )
+    {
+        say STDERR "Function name can't be empty (Gearman would allow that, but I don't)";
+        return undef;
+    }
+    if ( $function_name =~ /\n/ or $function_name =~ /\r/ or $function_name =~ /\s/ )
+    {
+        say STDERR "Function name can't contain line breaks or whitespace";
+        return undef;
+    }
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('create function ' . $function_name);
-	my $function_created = $telnet->getline();
-	chomp $function_created;
+    $telnet->print( 'create function ' . $function_name );
+    my $function_created = $telnet->getline();
+    chomp $function_created;
 
-	unless ($function_created eq 'OK') {
-		say STDERR "Server $server didn't respond with 'OK': $function_created";
-		return undef;
-	}
+    unless ( $function_created eq 'OK' )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $function_created";
+        return undef;
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<drop_function($function_name, $config)>
 
@@ -333,26 +350,29 @@ Parameters:
 Returns true (1) if the function has been dropped, false (C<undef>) on error.
 
 =cut
+
 sub drop_function($$)
 {
-	my ($function_name, $config) = @_;
+    my ( $function_name, $config ) = @_;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $result = drop_function_on_server($function_name, $server);
-		unless ($result) {
-			say STDERR "Unable to drop function '$function_name' on server $server.";
-			return undef;
-		}
-	}
+        my $result = drop_function_on_server( $function_name, $server );
+        unless ( $result )
+        {
+            say STDERR "Unable to drop function '$function_name' on server $server.";
+            return undef;
+        }
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<drop_function_on_server($function_name, $server)>
 
@@ -371,33 +391,36 @@ Parameters:
 Returns true (1) if the function has been dropped, false (C<undef>) on error.
 
 =cut
+
 sub drop_function_on_server($$)
 {
-	my ($function_name, $server) = @_;
+    my ( $function_name, $server ) = @_;
 
-	unless ($function_name) {
-		say STDERR "Function name can't be empty (Gearman would allow that, but I don't)";
-		return undef;
-	}
-	if ($function_name =~ /\n/ or $function_name =~ /\r/ or $function_name =~ /\s/) {
-		say STDERR "Function name can't contain line breaks or whitespace";
-		return undef;
-	}
+    unless ( $function_name )
+    {
+        say STDERR "Function name can't be empty (Gearman would allow that, but I don't)";
+        return undef;
+    }
+    if ( $function_name =~ /\n/ or $function_name =~ /\r/ or $function_name =~ /\s/ )
+    {
+        say STDERR "Function name can't contain line breaks or whitespace";
+        return undef;
+    }
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('drop function ' . $function_name);
-	my $function_dropped = $telnet->getline();
-	chomp $function_dropped;
+    $telnet->print( 'drop function ' . $function_name );
+    my $function_dropped = $telnet->getline();
+    chomp $function_dropped;
 
-	unless ($function_dropped eq 'OK') {
-		say STDERR "Server $server didn't respond with 'OK': $function_dropped";
-		return undef;
-	}
+    unless ( $function_dropped eq 'OK' )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $function_dropped";
+        return undef;
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<show_jobs($config)>
 
@@ -428,30 +451,33 @@ Returns a hashref of servers and their jobs, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub show_jobs($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	my $jobs = {};
+    my $jobs = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $server_jobs = show_jobs_on_server($server);
-		unless (defined $server_jobs) {
-			say STDERR "Unable to fetch jobs from server $server.";
-			return undef;
-		}
+        my $server_jobs = show_jobs_on_server( $server );
+        unless ( defined $server_jobs )
+        {
+            say STDERR "Unable to fetch jobs from server $server.";
+            return undef;
+        }
 
-		$jobs->{ $server } = $server_jobs;
-	}
+        $jobs->{ $server } = $server_jobs;
+    }
 
-	return $jobs;
+    return $jobs;
 }
-
 
 =head2 (static) C<show_jobs_on_server($server)>
 
@@ -493,45 +519,48 @@ Returns a hashref of job statuses, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub show_jobs_on_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
-	my $jobs = {};
+    my $telnet = _net_telnet_instance_for_server( $server );
+    my $jobs   = {};
 
-	$telnet->print('show jobs');
+    $telnet->print( 'show jobs' );
 
-	while ( my $line = $telnet->getline() ) {
-		chomp $line;
-		last if $line eq '.';
+    while ( my $line = $telnet->getline() )
+    {
+        chomp $line;
+        last if $line eq '.';
 
-		my @job = split("\t", $line);
-		unless (scalar @job == 4) {
-			say STDERR "Unable to parse line from server $server: $line";
-			return undef;
-		}
+        my @job = split( "\t", $line );
+        unless ( scalar @job == 4 )
+        {
+            say STDERR "Unable to parse line from server $server: $line";
+            return undef;
+        }
 
-		my $job_id = $job[0];
-		my $job_running = $job[1] + 0;
-		my $job_numerator = $job[2] + 0;
-		my $job_denominator = $job[3] + 0;
+        my $job_id          = $job[ 0 ];
+        my $job_running     = $job[ 1 ] + 0;
+        my $job_numerator   = $job[ 2 ] + 0;
+        my $job_denominator = $job[ 3 ] + 0;
 
-		if (defined $jobs->{ $job_id }) {
-			say STDERR "Job with job ID '$job_id' already exists in the jobs hashref, strange.";
-			return undef;
-		}
+        if ( defined $jobs->{ $job_id } )
+        {
+            say STDERR "Job with job ID '$job_id' already exists in the jobs hashref, strange.";
+            return undef;
+        }
 
-		$jobs->{ $job_id } = {
-			'running' => $job_running,
-			'numerator' => $job_numerator,
-			'denominator' => $job_denominator
-		};
-	}
+        $jobs->{ $job_id } = {
+            'running'     => $job_running,
+            'numerator'   => $job_numerator,
+            'denominator' => $job_denominator
+        };
+    }
 
-	return $jobs;
+    return $jobs;
 }
-
 
 =head2 (static) C<show_unique_jobs($config)>
 
@@ -563,26 +592,28 @@ Returns an arrayref of unique job identifiers, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub show_unique_jobs($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	my $job_identifiers = {};
+    my $job_identifiers = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $server_job_identifiers = show_unique_jobs_on_server($server);
-		unless (defined $server_job_identifiers) {
-			say STDERR "Unable to fetch job identifiers from server $server.";
-			return undef;
-		}
+        my $server_job_identifiers = show_unique_jobs_on_server( $server );
+        unless ( defined $server_job_identifiers )
+        {
+            say STDERR "Unable to fetch job identifiers from server $server.";
+            return undef;
+        }
 
-		$job_identifiers->{ $server } = $server_job_identifiers;
-	}
+        $job_identifiers->{ $server } = $server_job_identifiers;
+    }
 
-	return $job_identifiers;
+    return $job_identifiers;
 }
-
 
 =head2 (static) C<show_unique_jobs_on_server($server)>
 
@@ -612,30 +643,32 @@ Returns an arrayref of unique job identifiers, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub show_unique_jobs_on_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
-	my $job_identifiers = [];
+    my $telnet          = _net_telnet_instance_for_server( $server );
+    my $job_identifiers = [];
 
-	$telnet->print('show unique jobs');
+    $telnet->print( 'show unique jobs' );
 
-	while ( my $line = $telnet->getline() ) {
-		chomp $line;
-		last if $line eq '.';
+    while ( my $line = $telnet->getline() )
+    {
+        chomp $line;
+        last if $line eq '.';
 
-		unless ($line) {
-			say STDERR "Job identifier is empty for server $server";
-			return undef;
-		}
+        unless ( $line )
+        {
+            say STDERR "Job identifier is empty for server $server";
+            return undef;
+        }
 
-		push(@{$job_identifiers}, $line);
-	}
+        push( @{ $job_identifiers }, $line );
+    }
 
-	return $job_identifiers;
+    return $job_identifiers;
 }
-
 
 =head2 (static) C<cancel_job($gearman_job_id, $config)>
 
@@ -654,26 +687,29 @@ Parameters:
 Returns true (1) if the job has been cancelled, false (C<undef>) on error.
 
 =cut
+
 sub cancel_job($$)
 {
-	my ($gearman_job_id, $config) = @_;
+    my ( $gearman_job_id, $config ) = @_;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $result = cancel_job_on_server($gearman_job_id, $server);
-		unless ($result) {
-			say STDERR "Unable to cancel job '$gearman_job_id' on server $server.";
-			return undef;
-		}
-	}
+        my $result = cancel_job_on_server( $gearman_job_id, $server );
+        unless ( $result )
+        {
+            say STDERR "Unable to cancel job '$gearman_job_id' on server $server.";
+            return undef;
+        }
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<cancel_job_on_server($gearman_job_id, $server)>
 
@@ -692,33 +728,36 @@ Parameters:
 Returns true (1) if the job has been cancelled, false (C<undef>) on error.
 
 =cut
+
 sub cancel_job_on_server($$)
 {
-	my ($gearman_job_id, $server) = @_;
+    my ( $gearman_job_id, $server ) = @_;
 
-	unless ($gearman_job_id) {
-		say STDERR "Gearman job ID is empty.";
-		return undef;
-	}
-	if ($gearman_job_id =~ /\n/ or $gearman_job_id =~ /\r/) {
-		say STDERR "Gearman job ID can't contain line breaks";
-		return undef;
-	}
+    unless ( $gearman_job_id )
+    {
+        say STDERR "Gearman job ID is empty.";
+        return undef;
+    }
+    if ( $gearman_job_id =~ /\n/ or $gearman_job_id =~ /\r/ )
+    {
+        say STDERR "Gearman job ID can't contain line breaks";
+        return undef;
+    }
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('cancel job ' . $gearman_job_id);
-	my $job_cancelled = $telnet->getline();
-	chomp $job_cancelled;
+    $telnet->print( 'cancel job ' . $gearman_job_id );
+    my $job_cancelled = $telnet->getline();
+    chomp $job_cancelled;
 
-	unless ($job_cancelled eq 'OK') {
-		say STDERR "Server $server didn't respond with 'OK': $job_cancelled";
-		return undef;
-	}
+    unless ( $job_cancelled eq 'OK' )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $job_cancelled";
+        return undef;
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<get_pid($config)>
 
@@ -746,30 +785,33 @@ Returns hashref of configured servers and their integer PIDs, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub get_pid($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	my $pids = {};
+    my $pids = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $pid = get_pid_for_server($server);
-		unless (defined $pid) {
-			say STDERR "Unable to get PID of server $server.";
-			return undef;
-		}
+        my $pid = get_pid_for_server( $server );
+        unless ( defined $pid )
+        {
+            say STDERR "Unable to get PID of server $server.";
+            return undef;
+        }
 
-		$pids->{ $server } = $pid + 0;
-	}
+        $pids->{ $server } = $pid + 0;
+    }
 
-	return $pids;
+    return $pids;
 }
-
 
 =head2 (static) C<get_pid_for_server($server)>
 
@@ -788,30 +830,32 @@ Returns integer PID (e.g. 1234).
 Returns C<undef> on error.
 
 =cut
+
 sub get_pid_for_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('getpid');
-	my $pid = $telnet->getline();
-	chomp $pid;
+    $telnet->print( 'getpid' );
+    my $pid = $telnet->getline();
+    chomp $pid;
 
-	unless ($pid =~ /^OK /) {
-		say STDERR "Server $server didn't respond with 'OK': $pid";
-		return undef;
-	}
+    unless ( $pid =~ /^OK / )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $pid";
+        return undef;
+    }
 
-	$pid =~ s/^OK //;
-	unless ($pid) {
-		say STDERR "PID string is empty.";
-		return undef;
-	}
+    $pid =~ s/^OK //;
+    unless ( $pid )
+    {
+        say STDERR "PID string is empty.";
+        return undef;
+    }
 
-	return $pid + 0;
+    return $pid + 0;
 }
-
 
 =head2 (static) C<status($config)>
 
@@ -843,30 +887,33 @@ Returns a hashref of servers and their statuses, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub status($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	my $statuses = {};
+    my $statuses = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $status = status_on_server($server);
-		unless (defined $status) {
-			say STDERR "Unable to fetch status from server $server.";
-			return undef;
-		}
+        my $status = status_on_server( $server );
+        unless ( defined $status )
+        {
+            say STDERR "Unable to fetch status from server $server.";
+            return undef;
+        }
 
-		$statuses->{ $server } = $status;
-	}
+        $statuses->{ $server } = $status;
+    }
 
-	return $statuses;
+    return $statuses;
 }
-
 
 =head2 (static) C<status_on_server($server)>
 
@@ -908,45 +955,48 @@ Returns a hashref of Gearman functions and their statuses, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub status_on_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
-	my $functions = {};
+    my $telnet    = _net_telnet_instance_for_server( $server );
+    my $functions = {};
 
-	$telnet->print('status');
+    $telnet->print( 'status' );
 
-	while ( my $line = $telnet->getline() ) {
-		chomp $line;
-		last if $line eq '.';
+    while ( my $line = $telnet->getline() )
+    {
+        chomp $line;
+        last if $line eq '.';
 
-		my @function = split("\t", $line);
-		unless (scalar @function == 4) {
-			say STDERR "Unable to parse line from server $server: $line";
-			return undef;
-		}
+        my @function = split( "\t", $line );
+        unless ( scalar @function == 4 )
+        {
+            say STDERR "Unable to parse line from server $server: $line";
+            return undef;
+        }
 
-		my $function_name = $function[0];
-		my $function_total = $function[1] + 0;
-		my $function_running = $function[2] + 0;
-		my $function_available_workers = $function[3] + 0;
+        my $function_name              = $function[ 0 ];
+        my $function_total             = $function[ 1 ] + 0;
+        my $function_running           = $function[ 2 ] + 0;
+        my $function_available_workers = $function[ 3 ] + 0;
 
-		if (defined $functions->{ $function_name }) {
-			say STDERR "Function with name '$function_name' already exists in the functions hashref, strange.";
-			return undef;
-		}
+        if ( defined $functions->{ $function_name } )
+        {
+            say STDERR "Function with name '$function_name' already exists in the functions hashref, strange.";
+            return undef;
+        }
 
-		$functions->{ $function_name } = {
-			'total' => $function_total,
-			'running' => $function_running,
-			'available_workers' => $function_available_workers
-		};
-	}
+        $functions->{ $function_name } = {
+            'total'             => $function_total,
+            'running'           => $function_running,
+            'available_workers' => $function_available_workers
+        };
+    }
 
-	return $functions;
+    return $functions;
 }
-
 
 =head2 (static) C<workers($config)>
 
@@ -978,30 +1028,33 @@ Returns a hashref of servers and their workers, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub workers($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	my $workers = {};
+    my $workers = {};
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $server_workers = workers_on_server($server);
-		unless (defined $server_workers) {
-			say STDERR "Unable to fetch workers from server $server.";
-			return undef;
-		}
+        my $server_workers = workers_on_server( $server );
+        unless ( defined $server_workers )
+        {
+            say STDERR "Unable to fetch workers from server $server.";
+            return undef;
+        }
 
-		$workers->{ $server } = $server_workers;
-	}
+        $workers->{ $server } = $server_workers;
+    }
 
-	return $workers;
+    return $workers;
 }
-
 
 =head2 (static) C<workers_on_server($server)>
 
@@ -1044,47 +1097,53 @@ Returns an arrayref of hashrefs for each of the registered worker, e.g.:
 Returns C<undef> on error.
 
 =cut
+
 sub workers_on_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
-	my $workers = [];
+    my $telnet  = _net_telnet_instance_for_server( $server );
+    my $workers = [];
 
-	$telnet->print('workers');
+    $telnet->print( 'workers' );
 
-	while ( my $line = $telnet->getline() ) {
-		chomp $line;
-		last if $line eq '.';
+    while ( my $line = $telnet->getline() )
+    {
+        chomp $line;
+        last if $line eq '.';
 
-		my $colon_pos = index($line, ':');
-		if ($colon_pos == -1) {
-			say STDERR "Unable to parse line from server $server: $line";
-			return undef;
-		}
+        my $colon_pos = index( $line, ':' );
+        if ( $colon_pos == -1 )
+        {
+            say STDERR "Unable to parse line from server $server: $line";
+            return undef;
+        }
 
-		my @worker_description = split(/\s+/, substr($line, 0, $colon_pos));
-		unless (scalar @worker_description == 3) {
-			say STDERR "Unable to parse line from server $server: $line";
-			return undef;
-		}
-		my @worker_functions = split(/\s+/, substr($line, $colon_pos+1));
+        my @worker_description = split( /\s+/, substr( $line, 0, $colon_pos ) );
+        unless ( scalar @worker_description == 3 )
+        {
+            say STDERR "Unable to parse line from server $server: $line";
+            return undef;
+        }
+        my @worker_functions = split( /\s+/, substr( $line, $colon_pos + 1 ) );
 
-		my $worker_file_descriptor = $worker_description[0] + 0;
-		my $worker_ip_address = $worker_description[1];
-		my $worker_client_id = ($worker_description[2] ne '-' ? $worker_description[2] : undef);
+        my $worker_file_descriptor = $worker_description[ 0 ] + 0;
+        my $worker_ip_address      = $worker_description[ 1 ];
+        my $worker_client_id       = ( $worker_description[ 2 ] ne '-' ? $worker_description[ 2 ] : undef );
 
-		push(@{$workers}, {
-			'file_descriptor' => $worker_file_descriptor,
-			'ip_address' => $worker_ip_address,
-			'client_id' => $worker_client_id,
-			'functions' => \@worker_functions
-		});
-	}
+        push(
+            @{ $workers },
+            {
+                'file_descriptor' => $worker_file_descriptor,
+                'ip_address'      => $worker_ip_address,
+                'client_id'       => $worker_client_id,
+                'functions'       => \@worker_functions
+            }
+        );
+    }
 
-	return $workers;
+    return $workers;
 }
-
 
 =head2 (static) C<shutdown_all_servers($config)>
 
@@ -1103,26 +1162,29 @@ Returns true (1) if the Gearman servers have been shutdown.
 Returns false (C<undef>) on error.
 
 =cut
+
 sub shutdown_all_servers($)
 {
-	my $config = shift;
+    my $config = shift;
 
-	unless ($config) {
-		die "Configuration is undefined.";
-	}
+    unless ( $config )
+    {
+        die "Configuration is undefined.";
+    }
 
-	foreach my $server (@{$config->gearman_servers}) {
+    foreach my $server ( @{ $config->gearman_servers } )
+    {
 
-		my $result = shutdown_server($server);
-		unless ($result) {
-			say STDERR "Unable to shutdown server $server.";
-			return undef;
-		}
-	}
+        my $result = shutdown_server( $server );
+        unless ( $result )
+        {
+            say STDERR "Unable to shutdown server $server.";
+            return undef;
+        }
+    }
 
-	return 1;
+    return 1;
 }
-
 
 =head2 (static) C<shutdown_server($server)>
 
@@ -1141,40 +1203,42 @@ Returns true (1) if the Gearman server has been shutdown.
 Returns false (C<undef>) on error.
 
 =cut
+
 sub shutdown_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my $telnet = _net_telnet_instance_for_server($server);
+    my $telnet = _net_telnet_instance_for_server( $server );
 
-	$telnet->print('shutdown');
-	my $server_shutdown = $telnet->getline();
-	chomp $server_shutdown;
+    $telnet->print( 'shutdown' );
+    my $server_shutdown = $telnet->getline();
+    chomp $server_shutdown;
 
-	unless ($server_shutdown eq 'OK') {
-		say STDERR "Server $server didn't respond with 'OK': $server_shutdown";
-		return undef;
-	}
+    unless ( $server_shutdown eq 'OK' )
+    {
+        say STDERR "Server $server didn't respond with 'OK': $server_shutdown";
+        return undef;
+    }
 
-	return 1;
+    return 1;
 }
-
 
 # Connects to Gearman, returns Net::Telnet instance
 sub _net_telnet_instance_for_server($)
 {
-	my $server = shift;
+    my $server = shift;
 
-	my ($host, $port) = split(':', $server);
-	$port //= 4730;
+    my ( $host, $port ) = split( ':', $server );
+    $port //= 4730;
 
-	my $telnet = new Net::Telnet(Host => $host,
-								 Port => $port,
-								 Timeout => GJS_ADMIN_TIMEOUT);
-	$telnet->open();
+    my $telnet = new Net::Telnet(
+        Host    => $host,
+        Port    => $port,
+        Timeout => GJS_ADMIN_TIMEOUT
+    );
+    $telnet->open();
 
-	return $telnet;
+    return $telnet;
 }
-
 
 1;

@@ -9,20 +9,23 @@ use warnings;
 
 use Log::Log4perl qw(:easy);
 
-sub TIEHANDLE {
-	my $class = shift;
-	bless [], $class;
+sub TIEHANDLE
+{
+    my $class = shift;
+    bless [], $class;
 }
 
-sub PRINT {
-	my $self = shift;
-	$Log::Log4perl::caller_depth++;
-	DEBUG @_;
-	$Log::Log4perl::caller_depth--;
+sub PRINT
+{
+    my $self = shift;
+    $Log::Log4perl::caller_depth++;
+    DEBUG @_;
+    $Log::Log4perl::caller_depth--;
 }
 
-sub FILENO {
-	return undef;
+sub FILENO
+{
+    return undef;
 }
 
 1;

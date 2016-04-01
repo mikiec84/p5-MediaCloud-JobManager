@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 C<Gearman::JobScheduler::AbstractFunction> - An abstract class for a Gearman
@@ -14,11 +15,13 @@ A function to be run by Gearman or locally, e.g. C<add_default_feeds>.
 
 =item * Gearman job
 
-An instance of the Gearman function doing the actual job with specific parameters.
+An instance of the Gearman function doing the actual job with specific
+parameters.
 
 =back
 
 =cut
+
 package Gearman::JobScheduler::AbstractFunction;
 
 use strict;
@@ -28,7 +31,7 @@ use feature qw(switch);
 
 use Moose::Role 2.1005;
 
-use Gearman::JobScheduler;	# helper subroutines
+use Gearman::JobScheduler;    # helper subroutines
 use Gearman::JobScheduler::Configuration;
 use Gearman::JobScheduler::ErrorLogTrapper;
 
@@ -49,7 +52,6 @@ use Sys::Hostname;
 # used for capturing STDOUT and STDERR output of each job and timestamping it;
 # initialized before each job
 use Log::Log4perl qw(:easy);
-
 
 =head1 ABSTRACT INTERFACE
 
@@ -76,8 +78,8 @@ An instance (object) of the class will be created before each run. Class
 instance variables (e.g. C<$self-E<gt>_my_variable>) will be discarded after
 each run.
 
-Returns result on success (serializable by the L<JSON> module). The result
-will be discarded if the job is ordered on Gearman as a background process.
+Returns result on success (serializable by the L<JSON> module). The result will
+be discarded if the job is ordered on Gearman as a background process.
 
 Provides progress reports when available:
 
@@ -92,8 +94,8 @@ C<die()>s on error.
 Writes log to C<STDOUT> or C<STDERR> (preferably the latter).
 
 =cut
-requires 'run';
 
+requires 'run';
 
 =head3 (static) C<retries()>
 
@@ -107,12 +109,12 @@ Returns 0 if the job should not be retried (attempted only once).
 Default implementation of this subroutine returns 0 (no retries).
 
 =cut
+
 sub retries()
 {
-	# By default the job will not be retried if it fails
-	return 0;
+    # By default the job will not be retried if it fails
+    return 0;
 }
-
 
 =head3 (static) C<unique()>
 
@@ -124,33 +126,33 @@ same and instead should be merged into one.
 Default implementation of this subroutine returns "true".
 
 =cut
+
 sub unique()
 {
-	# By default the jobs are "unique", e.g. if there's already an
-	# "Addition({operand_a => 2, operand_b => 3})" job running, a new one won't
-	# be initialized
-	return 1;
+    # By default the jobs are "unique", e.g. if there's already an
+    # "Addition({operand_a => 2, operand_b => 3})" job running, a new one won't
+    # be initialized
+    return 1;
 }
-
 
 =head3 (static) C<notify_on_failure()>
 
 Return true if the client / worker should send error report by email when the
 function fails.
 
-Returns true if the GJS client (in case C<run_locally()> is used) or worker
-(in case C<run_on_gearman()> or C<enqueue_on_gearman()> is being used) should
-send an email when the function fails to run.
+Returns true if the GJS client (in case C<run_locally()> is used) or worker (in
+case C<run_on_gearman()> or C<enqueue_on_gearman()> is being used) should send
+an email when the function fails to run.
 
 Default implementation of this subroutine returns "true".
 
 =cut
+
 sub notify_on_failure()
 {
-	# By default jobs will send notifications when they fail
-	return 1;
+    # By default jobs will send notifications when they fail
+    return 1;
 }
-
 
 =head3 (static) C<unify_logs()>
 
@@ -164,13 +166,12 @@ C<NinetyNineBottlesOfBeer/gearman_job_id.gjs_job_id.log>.
 Default implementation of this subroutine returns "false".
 
 =cut
+
 sub unify_logs()
 {
-	# By default, write log of each job to a separate file
-	return 0;
+    # By default, write log of each job to a separate file
+    return 0;
 }
-
-
 
 =head3 (static) C<configuration()>
 
@@ -185,11 +186,11 @@ Default implementation of this subroutine returns an instance of
 C<Gearman::JobScheduler::Configuration> (default configuration).
 
 =cut
+
 sub configuration()
 {
-	return Gearman::JobScheduler::Configuration->instance;
+    return Gearman::JobScheduler::Configuration->instance;
 }
-
 
 =head3 (static) C<priority()>
 
@@ -215,15 +216,14 @@ Default implementation of this subroutine returns C<GJS_JOB_PRIORITY_NORMAL()>
 
 # Gearman job priorities (subroutines instead of constants because exporting
 # constants with Moose in place is painful)
-sub GJS_JOB_PRIORITY_LOW { 'low' }
+sub GJS_JOB_PRIORITY_LOW    { 'low' }
 sub GJS_JOB_PRIORITY_NORMAL { 'normal' }
-sub GJS_JOB_PRIORITY_HIGH { 'high' }
+sub GJS_JOB_PRIORITY_HIGH   { 'high' }
 
 sub priority()
 {
-	return GJS_JOB_PRIORITY_NORMAL();
+    return GJS_JOB_PRIORITY_NORMAL();
 }
-
 
 =head1 HELPER SUBROUTINES
 
@@ -248,29 +248,31 @@ Examples:
 =back
 
 =cut
+
 sub set_progress($$$)
 {
-	my ($self, $numerator, $denominator) = @_;
+    my ( $self, $numerator, $denominator ) = @_;
 
-	unless (defined $self->_gearman_job) {
-		# Running the job locally, Gearman doesn't have anything to do with this run
-		DEBUG("Gearman job is undef");
-		return;
-	}
-	unless ($denominator) {
-		die "Denominator is 0.";
-	}
+    unless ( defined $self->_gearman_job )
+    {
+        # Running the job locally, Gearman doesn't have anything to do with this run
+        DEBUG( "Gearman job is undef" );
+        return;
+    }
+    unless ( $denominator )
+    {
+        die "Denominator is 0.";
+    }
 
-	# Written to job's log
-	say STDERR "$numerator/$denominator complete.";
+    # Written to job's log
+    say STDERR "$numerator/$denominator complete.";
 
-	my $ret = $self->_gearman_job->send_status($numerator, $denominator);
-	unless ($ret == GEARMAN_SUCCESS) {
-		LOGDIE("Unable to send Gearman job status: " . $self->_gearman_job->error());
-	}
+    my $ret = $self->_gearman_job->send_status( $numerator, $denominator );
+    unless ( $ret == GEARMAN_SUCCESS )
+    {
+        LOGDIE( "Unable to send Gearman job status: " . $self->_gearman_job->error() );
+    }
 }
-
-
 
 =head1 CLIENT SUBROUTINES
 
@@ -298,190 +300,211 @@ send_progress()
 Returns result (may be false of C<undef>) on success, C<die()>s on error
 
 =cut
+
 sub run_locally($;$$$)
 {
-	my $class = shift;
-	my $args = shift;
-	my $config = shift;
-	my $gearman_job = shift;
+    my $class       = shift;
+    my $args        = shift;
+    my $config      = shift;
+    my $gearman_job = shift;
 
-	if (ref $class) {
-		die "Use this subroutine as a static method, e.g. MyGearmanFunction->run_locally()";
-	}
+    if ( ref $class )
+    {
+        die "Use this subroutine as a static method, e.g. MyGearmanFunction->run_locally()";
+    }
 
-	my $function_name = $class->name();
+    my $function_name = $class->name();
 
-	unless ($config) {
-		$config = Gearman::JobScheduler::_default_configuration($function_name);
-	}
+    unless ( $config )
+    {
+        $config = Gearman::JobScheduler::_default_configuration( $function_name );
+    }
 
-	# say STDERR "Running locally";
+    # say STDERR "Running locally";
 
-	if ((@_) or
-		($args and ref($args) ne 'HASH' ) or
-		(defined $gearman_job and ref($gearman_job) ne 'Gearman::XS::Job')) {
+    if (   ( @_ )
+        or ( $args and ref( $args ) ne 'HASH' )
+        or ( defined $gearman_job and ref( $gearman_job ) ne 'Gearman::XS::Job' ) )
+    {
 
-		die "run() should accept a single hashref for all the arguments.";
-	}
+        die "run() should accept a single hashref for all the arguments.";
+    }
 
-	my $gjs_job_id;
-	if ($gearman_job) {
-		# Running from Gearman
-		unless (defined $gearman_job->handle()) {
-			die "Unable to find a Gearman job ID to be used for logging";
-		}
-		$gjs_job_id = Gearman::JobScheduler::_unique_path_job_id($function_name, $args, $gearman_job->handle());
-	} else {
-		$gjs_job_id = Gearman::JobScheduler::_unique_path_job_id($function_name, $args);
-	}
-	unless ($gjs_job_id) {
-		die "Unable to determine unique GJS job ID";
-	}
+    my $gjs_job_id;
+    if ( $gearman_job )
+    {
+        # Running from Gearman
+        unless ( defined $gearman_job->handle() )
+        {
+            die "Unable to find a Gearman job ID to be used for logging";
+        }
+        $gjs_job_id = Gearman::JobScheduler::_unique_path_job_id( $function_name, $args, $gearman_job->handle() );
+    }
+    else
+    {
+        $gjs_job_id = Gearman::JobScheduler::_unique_path_job_id( $function_name, $args );
+    }
+    unless ( $gjs_job_id )
+    {
+        die "Unable to determine unique GJS job ID";
+    }
 
-	my $log_path = Gearman::JobScheduler::_worker_log_path($function_name, $gjs_job_id, $config);
-	my $starting_job_message;
-	if ( -f $log_path and (! $function_name->unify_logs())) {
-		# Worker crashed last time and now tries to write to the same log path
-		# (will append to the log)
-		$starting_job_message = "Restarting job ID \"$gjs_job_id\", logging to \"$log_path\" ...";
-	} else {
-		$starting_job_message = "Starting job ID \"$gjs_job_id\", logging to \"$log_path\" ...";
-	}
+    my $log_path = Gearman::JobScheduler::_worker_log_path( $function_name, $gjs_job_id, $config );
+    my $starting_job_message;
+    if ( -f $log_path and ( !$function_name->unify_logs() ) )
+    {
+        # Worker crashed last time and now tries to write to the same log path
+        # (will append to the log)
+        $starting_job_message = "Restarting job ID \"$gjs_job_id\", logging to \"$log_path\" ...";
+    }
+    else
+    {
+        $starting_job_message = "Starting job ID \"$gjs_job_id\", logging to \"$log_path\" ...";
+    }
 
-	my $finished_job_message;
+    my $finished_job_message;
 
-	_reset_log4perl();
-	INFO($starting_job_message);
+    _reset_log4perl();
+    INFO( $starting_job_message );
 
-	Log::Log4perl->easy_init({
-		level => $DEBUG,
-		utf8=>1,
-		file => ">>$log_path",	# do not use STDERR / STDOUT here because it would end up with recursion
-		layout => "%d{ISO8601} [%P]: %m"
-	});
+    Log::Log4perl->easy_init(
+        {
+            level  => $DEBUG,
+            utf8   => 1,
+            file   => ">>$log_path",           # do not use STDERR / STDOUT here because it would end up with recursion
+            layout => "%d{ISO8601} [%P]: %m"
+        }
+    );
 
+    # Tie STDOUT / STDERR to Log4perl handler
+    tie *STDOUT, "Gearman::JobScheduler::ErrorLogTrapper";
+    tie *STDERR, "Gearman::JobScheduler::ErrorLogTrapper";
 
-	# Tie STDOUT / STDERR to Log4perl handler
-	tie *STDOUT, "Gearman::JobScheduler::ErrorLogTrapper";
-	tie *STDERR, "Gearman::JobScheduler::ErrorLogTrapper";
+    my $result;
 
-	my $result;
+    eval {
 
-	eval {
+        my $d = Data::Dumper->new( [ $args ], [ 'args' ] );
+        $d->Indent( 0 );
+        my $str_arguments = $d->Dump;
 
-		my $d = Data::Dumper->new([$args], ['args']);
-		$d->Indent(0);
-		my $str_arguments = $d->Dump;
+        say STDERR $starting_job_message;
+        say STDERR "========";
+        say STDERR "Arguments: $str_arguments";
+        say STDERR "========";
+        say STDERR "";
 
-		say STDERR $starting_job_message;
-		say STDERR "========";
-		say STDERR "Arguments: $str_arguments";
-		say STDERR "========";
-		say STDERR "";
+        my $start = Time::HiRes::gettimeofday();
 
-		my $start = Time::HiRes::gettimeofday();
+        my $job_succeeded = 0;
+        for ( my $retry = 0 ; $retry <= $class->retries() ; ++$retry )
+        {
+            if ( $retry > 0 )
+            {
+                say STDERR "";
+                say STDERR "========";
+                say STDERR "Retrying ($retry)...";
+                say STDERR "========";
+                say STDERR "";
+            }
 
-	    my $job_succeeded = 0;
-	    for ( my $retry = 0 ; $retry <= $class->retries() ; ++$retry )
-	    {
-	        if ( $retry > 0 )
-	        {
-	        	say STDERR "";
-				say STDERR "========";
-	            say STDERR "Retrying ($retry)...";
-				say STDERR "========";
-	        	say STDERR "";
-	        }
+            eval {
 
-	        eval {
+                # Try to run the job
+                my $instance = $class->new();
 
-				# Try to run the job
-				my $instance = $class->new();
+                # _gearman_job is undef when running locally, instance when issued from _run_locally_from_gearman_worker
+                $instance->_gearman_job( $gearman_job );
 
-				# _gearman_job is undef when running locally, instance when issued from _run_locally_from_gearman_worker
-				$instance->_gearman_job($gearman_job);
+                # Do the work
+                $result = $instance->run( $args );
 
-				# Do the work
-				$result = $instance->run($args);
+                # Unset the _gearman_job for the sake of cleanliness
+                $instance->_gearman_job( undef );
 
-				# Unset the _gearman_job for the sake of cleanliness
-				$instance->_gearman_job(undef);
+                # Destroy instance
+                $instance = undef;
 
-				# Destroy instance
-				$instance = undef;
+                $job_succeeded = 1;
+            };
 
-	            $job_succeeded = 1;
-	        };
+            if ( $@ )
+            {
+                say STDERR "Job \"$gjs_job_id\" failed: $@";
+            }
+            else
+            {
+                last;
+            }
+        }
 
-	        if ( $@ )
-	        {
-	            say STDERR "Job \"$gjs_job_id\" failed: $@";
-	        }
-	        else
-	        {
-	            last;
-	        }
-	    }
+        unless ( $job_succeeded )
+        {
+            my $job_failed_message = "Job \"$gjs_job_id\" failed" .
+              ( $class->retries() ? " after " . $class->retries() . " retries" : "" ) . ": $@";
 
-	    unless ( $job_succeeded )
-	    {
-	    	my $job_failed_message = "Job \"$gjs_job_id\" failed" . ($class->retries() ? " after " . $class->retries() . " retries" : "") . ": $@";
+            say STDERR "";
+            say STDERR "========";
+            say STDERR $job_failed_message;
+            die $job_failed_message;
+        }
 
-			say STDERR "";
-			say STDERR "========";
-	    	say STDERR $job_failed_message;
-	        die $job_failed_message;
-	    }
+        my $end = Time::HiRes::gettimeofday();
 
-	    my $end = Time::HiRes::gettimeofday();
+        say STDERR "";
+        say STDERR "========";
+        $finished_job_message = "Finished job ID \"$gjs_job_id\" in " . sprintf( "%.2f", $end - $start ) . " seconds";
+        say STDERR $finished_job_message;
 
-		say STDERR "";
-		say STDERR "========";
-		$finished_job_message = "Finished job ID \"$gjs_job_id\" in " . sprintf("%.2f", $end - $start) . " seconds";
-	    say STDERR $finished_job_message;
+    };
 
-	};
+    my $error = $@;
+    if ( $error )
+    {
+        # Write to job's log
+        say STDERR "Job died: $error";
+    }
 
-	my $error = $@;
-	if ($error) {
-		# Write to job's log
-		say STDERR "Job died: $error";
-	}
-
-	# Untie STDOUT / STDERR from Log4perl
+    # Untie STDOUT / STDERR from Log4perl
     untie *STDERR;
     untie *STDOUT;
 
-	_reset_log4perl();
-	if ($finished_job_message) {
-		INFO($finished_job_message);
-	}
+    _reset_log4perl();
+    if ( $finished_job_message )
+    {
+        INFO( $finished_job_message );
+    }
 
     if ( $error )
     {
-    	# Send email notification (if needed)
-    	eval {
-	    	if ($class->notify_on_failure()) {
+        # Send email notification (if needed)
+        eval {
+            if ( $class->notify_on_failure() )
+            {
 
-	    		my $now = DateTime->now()->strftime('%a, %d %b %Y %H:%M:%S %z');
-	    		my $hostname = hostname;
+                my $now      = DateTime->now()->strftime( '%a, %d %b %Y %H:%M:%S %z' );
+                my $hostname = hostname;
 
-	    		# Tail the log file
-	    		my Readonly $how_many_lines = 50;
-	    		my $last_lines = '';
-	    		my $lines_read;
-	    		my $bw = File::ReadBackwards->new( $log_path ) or die "Unable to open '$log_path' for tailing: $!";
-	    		for ($lines_read = 1; $lines_read <= $how_many_lines; ++$lines_read) {
-	    			my $log_line = $bw->readline;
-	    			if (defined $log_line) {
-	    				$last_lines = "$log_line$last_lines";
-	    			} else {
-	    				last;
-	    			}
-	    		}
+                # Tail the log file
+                my Readonly $how_many_lines = 50;
+                my $last_lines = '';
+                my $lines_read;
+                my $bw = File::ReadBackwards->new( $log_path ) or die "Unable to open '$log_path' for tailing: $!";
+                for ( $lines_read = 1 ; $lines_read <= $how_many_lines ; ++$lines_read )
+                {
+                    my $log_line = $bw->readline;
+                    if ( defined $log_line )
+                    {
+                        $last_lines = "$log_line$last_lines";
+                    }
+                    else
+                    {
+                        last;
+                    }
+                }
 
-	    		my $message_subject = 'Function "' . $function_name . '" failed';
-	    		my $message_body = <<EOF;
+                my $message_subject = 'Function "' . $function_name . '" failed';
+                my $message_body    = <<EOF;
 Gearman function "$function_name" failed while running on "$hostname" at $now because:
 
 <snip>
@@ -496,20 +519,20 @@ Last $lines_read lines of the log:
 $last_lines
 </snip>
 EOF
-	    		Gearman::JobScheduler::_send_email($message_subject, $message_body, $config);
-	    	}
-	    };
-	    if ($@) {
-	    	$error = "Failed to send notification email informing about the job failure: $@\nJob failed because: $error";
-	    }
+                Gearman::JobScheduler::_send_email( $message_subject, $message_body, $config );
+            }
+        };
+        if ( $@ )
+        {
+            $error = "Failed to send notification email informing about the job failure: $@\nJob failed because: $error";
+        }
 
-    	# Print out to worker's STDERR and die()
-    	LOGDIE("$error");
+        # Print out to worker's STDERR and die()
+        LOGDIE( "$error" );
     }
 
-	return $result;
+    return $result;
 }
-
 
 =head2 (static) C<$class-E<gt>run_on_gearman([$args, $config])>
 
@@ -530,78 +553,95 @@ function (serializable by the L<JSON> module)
 Returns result (may be false of C<undef>) on success, C<die()>s on error
 
 =cut
+
 sub run_on_gearman($;$$)
 {
-	my $class = shift;
-	my $args = shift;
-	my $config = shift;
+    my $class  = shift;
+    my $args   = shift;
+    my $config = shift;
 
-	if (ref $class) {
-		die "Use this subroutine as a static method, e.g. MyGearmanFunction->run_on_gearman()";
-	}
+    if ( ref $class )
+    {
+        die "Use this subroutine as a static method, e.g. MyGearmanFunction->run_on_gearman()";
+    }
 
-	my $function_name = $class->name;
+    my $function_name = $class->name;
 
-	unless ($config) {
-		$config = Gearman::JobScheduler::_default_configuration($function_name);
-	}
+    unless ( $config )
+    {
+        $config = Gearman::JobScheduler::_default_configuration( $function_name );
+    }
 
-	my $client = Gearman::JobScheduler::_gearman_xs_client($config);
-	unless ($function_name) {
-		die "Unable to determine function name.";
-	}
+    my $client = Gearman::JobScheduler::_gearman_xs_client( $config );
+    unless ( $function_name )
+    {
+        die "Unable to determine function name.";
+    }
 
-	my $args_serialized = Gearman::JobScheduler::_serialize_hashref($args);
+    my $args_serialized = Gearman::JobScheduler::_serialize_hashref( $args );
 
-	# Gearman::XS::Client seems to not like undefined or empty workload()
-	# so we pass 0 instead
-	$args_serialized ||= 0;
+    # Gearman::XS::Client seems to not like undefined or empty workload()
+    # so we pass 0 instead
+    $args_serialized ||= 0;
 
-	# Choose the client subroutine to use (based on the priority)
-	my $client_do_ref = undef;
-	my $class_priority = $class->priority();
+    # Choose the client subroutine to use (based on the priority)
+    my $client_do_ref  = undef;
+    my $class_priority = $class->priority();
 
-	if ($class_priority eq GJS_JOB_PRIORITY_LOW()) {
-		$client_do_ref = sub { $client->do_low(@_) };
+    if ( $class_priority eq GJS_JOB_PRIORITY_LOW() )
+    {
+        $client_do_ref = sub { $client->do_low( @_ ) };
 
-	} elsif ($class_priority eq GJS_JOB_PRIORITY_NORMAL()) {
-		$client_do_ref = sub { $client->do(@_) };
+    }
+    elsif ( $class_priority eq GJS_JOB_PRIORITY_NORMAL() )
+    {
+        $client_do_ref = sub { $client->do( @_ ) };
 
-	} elsif ($class_priority eq GJS_JOB_PRIORITY_HIGH()) {
-		$client_do_ref = sub { $client->do_high(@_) };
+    }
+    elsif ( $class_priority eq GJS_JOB_PRIORITY_HIGH() )
+    {
+        $client_do_ref = sub { $client->do_high( @_ ) };
 
-	} else {
-		die "Unknown job priority: " . $class_priority;
+    }
+    else
+    {
+        die "Unknown job priority: " . $class_priority;
 
-	}
+    }
 
-	# Client arguments
-	my @client_args;
-	if ($class->unique()) {
-		# If the job is set to be "unique", we need to pass a "unique identifier"
-		# to Gearman so that it knows which jobs to merge into one
-		@client_args = ($function_name, $args_serialized, Gearman::JobScheduler::unique_job_id($function_name, $args));
-	} else {
-		@client_args = ($function_name, $args_serialized);
-	}
+    # Client arguments
+    my @client_args;
+    if ( $class->unique() )
+    {
+        # If the job is set to be "unique", we need to pass a "unique identifier"
+        # to Gearman so that it knows which jobs to merge into one
+        @client_args = ( $function_name, $args_serialized, Gearman::JobScheduler::unique_job_id( $function_name, $args ) );
+    }
+    else
+    {
+        @client_args = ( $function_name, $args_serialized );
+    }
 
-	# Do the job
-	my ($ret, $result) = &{$client_do_ref}(@client_args);
-	unless ($ret == GEARMAN_SUCCESS) {
-		die "Gearman failed: " . $client->error();
-	}
+    # Do the job
+    my ( $ret, $result ) = &{ $client_do_ref }( @client_args );
+    unless ( $ret == GEARMAN_SUCCESS )
+    {
+        die "Gearman failed: " . $client->error();
+    }
 
-	# Deserialize the results (because they were serialized and put into
-	# hashref by _run_locally_from_gearman_worker())
-	my $result_deserialized = Gearman::JobScheduler::_unserialize_hashref($result);
-	if (ref $result_deserialized eq 'HASH') {
-		return $result_deserialized->{result};
-	} else {
-		# No result
-		return undef;
-	}
+    # Deserialize the results (because they were serialized and put into
+    # hashref by _run_locally_from_gearman_worker())
+    my $result_deserialized = Gearman::JobScheduler::_unserialize_hashref( $result );
+    if ( ref $result_deserialized eq 'HASH' )
+    {
+        return $result_deserialized->{ result };
+    }
+    else
+    {
+        # No result
+        return undef;
+    }
 }
-
 
 =head2 (static) C<$class-E<gt>enqueue_on_gearman([$args, $config])>
 
@@ -623,72 +663,86 @@ Returns Gearman-provided string job identifier (Gearman job ID) if the job was
 enqueued successfully, C<die()>s on error.
 
 =cut
+
 sub enqueue_on_gearman($;$$)
 {
-	my $class = shift;
-	my $args = shift;
-	my $config = shift;
+    my $class  = shift;
+    my $args   = shift;
+    my $config = shift;
 
-	if (ref $class) {
-		die "Use this subroutine as a static method, e.g. MyGearmanFunction->enqueue_on_gearman()";
-	}
+    if ( ref $class )
+    {
+        die "Use this subroutine as a static method, e.g. MyGearmanFunction->enqueue_on_gearman()";
+    }
 
-	my $function_name = $class->name;
+    my $function_name = $class->name;
 
-	unless ($config) {
-		$config = Gearman::JobScheduler::_default_configuration($function_name);
-	}
+    unless ( $config )
+    {
+        $config = Gearman::JobScheduler::_default_configuration( $function_name );
+    }
 
-	my $client = Gearman::JobScheduler::_gearman_xs_client($config);
-	unless ($function_name) {
-		die "Unable to determine function name.";
-	}
+    my $client = Gearman::JobScheduler::_gearman_xs_client( $config );
+    unless ( $function_name )
+    {
+        die "Unable to determine function name.";
+    }
 
-	my $args_serialized = Gearman::JobScheduler::_serialize_hashref($args);
+    my $args_serialized = Gearman::JobScheduler::_serialize_hashref( $args );
 
-	# Gearman::XS::Client seems to not like undefined or empty workload()
-	# so we pass 0 instead
-	$args_serialized ||= 0;
+    # Gearman::XS::Client seems to not like undefined or empty workload()
+    # so we pass 0 instead
+    $args_serialized ||= 0;
 
-	# Choose the client subroutine to use (based on the priority)
-	my $client_do_bg_ref = undef;
-	my $class_priority = $class->priority();
+    # Choose the client subroutine to use (based on the priority)
+    my $client_do_bg_ref = undef;
+    my $class_priority   = $class->priority();
 
-	if ($class_priority eq GJS_JOB_PRIORITY_LOW()) {
-		$client_do_bg_ref = sub { $client->do_low_background(@_) };
+    if ( $class_priority eq GJS_JOB_PRIORITY_LOW() )
+    {
+        $client_do_bg_ref = sub { $client->do_low_background( @_ ) };
 
-	} elsif ($class_priority eq GJS_JOB_PRIORITY_NORMAL()) {
-		$client_do_bg_ref = sub { $client->do_background(@_) };
+    }
+    elsif ( $class_priority eq GJS_JOB_PRIORITY_NORMAL() )
+    {
+        $client_do_bg_ref = sub { $client->do_background( @_ ) };
 
-	} elsif ($class_priority eq GJS_JOB_PRIORITY_HIGH()) {
-		$client_do_bg_ref = sub { $client->do_high_background(@_) };
+    }
+    elsif ( $class_priority eq GJS_JOB_PRIORITY_HIGH() )
+    {
+        $client_do_bg_ref = sub { $client->do_high_background( @_ ) };
 
-	} else {
-		die "Unknown job priority: " . $class_priority;
+    }
+    else
+    {
+        die "Unknown job priority: " . $class_priority;
 
-	}
+    }
 
-	# Client arguments
-	my @client_args;
-	if ($class->unique()) {
-		# If the job is set to be "unique", we need to pass a "unique identifier"
-		# to Gearman so that it knows which jobs to merge into one
-		@client_args = ($function_name, $args_serialized, Gearman::JobScheduler::unique_job_id($function_name, $args));
-	} else {
-		@client_args = ($function_name, $args_serialized);
-	}
+    # Client arguments
+    my @client_args;
+    if ( $class->unique() )
+    {
+        # If the job is set to be "unique", we need to pass a "unique identifier"
+        # to Gearman so that it knows which jobs to merge into one
+        @client_args = ( $function_name, $args_serialized, Gearman::JobScheduler::unique_job_id( $function_name, $args ) );
+    }
+    else
+    {
+        @client_args = ( $function_name, $args_serialized );
+    }
 
-	# Enqueue the job
-	my ($ret, $gearman_job_id) = &{$client_do_bg_ref}(@client_args);
-	unless ($ret == GEARMAN_SUCCESS) {
-		die "Gearman failed while doing task in background: " . $client->error();
-	}
+    # Enqueue the job
+    my ( $ret, $gearman_job_id ) = &{ $client_do_bg_ref }( @client_args );
+    unless ( $ret == GEARMAN_SUCCESS )
+    {
+        die "Gearman failed while doing task in background: " . $client->error();
+    }
 
-	say STDERR "Enqueued job '$gearman_job_id' on Gearman";
+    say STDERR "Enqueued job '$gearman_job_id' on Gearman";
 
-	return $gearman_job_id;
+    return $gearman_job_id;
 }
-
 
 =head2 (static) C<name()>
 
@@ -707,74 +761,76 @@ Parameters:
 =back
 
 =cut
+
 sub name($)
 {
-	my $self_or_class = shift;
+    my $self_or_class = shift;
 
-	my $function_name = '';
-	if (ref($self_or_class)) {
-		# Instance
-		$function_name = '' . ref($self_or_class);
-	} else {
-		# Static
-		$function_name = $self_or_class;
-	}
+    my $function_name = '';
+    if ( ref( $self_or_class ) )
+    {
+        # Instance
+        $function_name = '' . ref( $self_or_class );
+    }
+    else
+    {
+        # Static
+        $function_name = $self_or_class;
+    }
 
-	if ($function_name eq 'AbstractFunction') {
-		die "Unable to determine function name.";
-	}
+    if ( $function_name eq 'AbstractFunction' )
+    {
+        die "Unable to determine function name.";
+    }
 
-	return $function_name;
+    return $function_name;
 }
-
-
 
 # _run_locally_from_gearman_worker() will pass this parameter to run_locally()
 # which, in turn, will temporarily place an instance of Gearman::XS::Job to
 # this variable so that set_progress() helper can later use it
 has '_gearman_job' => ( is => 'rw' );
 
-
 # Run locally and right away, blocking the parent process while it gets finished
 # (issued by the Gearman worker)
 # Returns result (may be false of undef) on success, die()s on error
 sub _run_locally_from_gearman_worker($$;$)
 {
-	my ($class, $config, $gearman_job) = @_;
+    my ( $class, $config, $gearman_job ) = @_;
 
-	if (ref $class) {
-		LOGDIE("Use this subroutine as a static method.");
-	}
+    if ( ref $class )
+    {
+        LOGDIE( "Use this subroutine as a static method." );
+    }
 
-	# Args were serialized by run_on_gearman()
-	my $args = Gearman::JobScheduler::_unserialize_hashref($gearman_job->workload());
+    # Args were serialized by run_on_gearman()
+    my $args = Gearman::JobScheduler::_unserialize_hashref( $gearman_job->workload() );
 
-	my $result;
-	eval {
-		$result = $class->run_locally($args, $config, $gearman_job);
-	};
-	if ($@) {
-		LOGDIE("Gearman job died: $@");
-	}
+    my $result;
+    eval { $result = $class->run_locally( $args, $config, $gearman_job ); };
+    if ( $@ )
+    {
+        LOGDIE( "Gearman job died: $@" );
+    }
 
-	# Create a hashref and serialize result because it's going to be passed over Gearman
-	$result = { 'result' => $result };
-	my $result_serialized = Gearman::JobScheduler::_serialize_hashref($result);
+    # Create a hashref and serialize result because it's going to be passed over Gearman
+    $result = { 'result' => $result };
+    my $result_serialized = Gearman::JobScheduler::_serialize_hashref( $result );
 
-	return $result_serialized;
+    return $result_serialized;
 }
-
 
 # (static) Reset Log::Log4perl to write to the STDERR / STDOUT and not to file
 sub _reset_log4perl()
 {
-	Log::Log4perl->easy_init({
-		level => $DEBUG,
-		utf8=>1,
-		layout => "%d{ISO8601} [%P]: %m%n"
-	});
+    Log::Log4perl->easy_init(
+        {
+            level  => $DEBUG,
+            utf8   => 1,
+            layout => "%d{ISO8601} [%P]: %m%n"
+        }
+    );
 }
-
 
 no Moose;    # gets rid of scaffolding
 

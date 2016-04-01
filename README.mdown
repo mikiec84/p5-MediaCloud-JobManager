@@ -190,6 +190,13 @@ Parameters:
 
 - Class or class instance
 
+# Code formatting
+
+Install `perltidy` Git hook to automatically fix script formatting:
+
+    cpanm --installdeps .
+    githook-perltidy install
+
 # TODO
 
 - code formatting

@@ -1,3 +1,6 @@
+.perltidyrc
+.podtidy-opts
+.travis.yml
 Build.PL
 Changes
 lib/Gearman/JobScheduler.pm

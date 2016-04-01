@@ -9,6 +9,7 @@ resources:
   license: http://dev.perl.org/licenses/
   repository: https://github.com/pypt/p5-Gearman-JobScheduler
 requires:
+  App::githook_perltidy: v0.10.2
   Capture::Tiny: 0,
   Carp: 0,
   Data::Compare: 0,
