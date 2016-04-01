@@ -25,12 +25,12 @@ env:
         - GJS_WORKER_LOG_DIR=~/gearman-jobscheduler-logs/
 before_install:
     # Install test coverage reporting tool
-    - travis_retry cpanm Devel::Cover::Report::Coveralls
+    - travis_retry cpanm --notest Devel::Cover::Report::Coveralls
 install:
     # Install Perl dependencies
     - travis_retry cpanm --installdeps --notest .
 script:
     - perl Makefile.PL
     - make
-    - cover -test -report coveralls
     - make install
+    - cover -test -report coveralls

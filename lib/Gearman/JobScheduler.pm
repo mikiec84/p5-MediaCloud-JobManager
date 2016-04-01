@@ -3,11 +3,36 @@
 
 C<Gearman::JobScheduler> - Gearman job scheduler utilities.
 
+=head1 SYNOPSIS
+
+  use Gearman::JobScheduler;
+
+=head1 DESCRIPTION
+
+Run jobs locally or on Gearman.
+
+=head2 EXPORT
+
+None by default.
+
+=head1 AUTHOR
+
+Linas Valiukas, E<lt>lvaliukas@cyber.law.harvard.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2013- Linas Valiukas, 2013- Berkman Center for Internet &
+Society.
+
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself, either Perl version 5.18.2 or, at your option,
+any later version of Perl 5 you may have available.
+
 =cut
 
 package Gearman::JobScheduler;
 
-$VERSION = '0.16';
+our $VERSION = '0.16';
 
 use strict;
 use warnings;

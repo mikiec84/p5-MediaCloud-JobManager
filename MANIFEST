@@ -1,4 +1,3 @@
-Build.PL
 Changes
 lib/Gearman/JobScheduler.pm
 lib/Gearman/JobScheduler/AbstractFunction.pm
@@ -9,7 +8,6 @@ lib/Gearman/JobScheduler/Worker.pm
 LICENSE
 Makefile.PL
 MANIFEST
-META.yml			Module meta-data (added by MakeMaker)
 README.mdown
 samples/Addition.pm
 samples/AdditionAlwaysFails.pm
