@@ -32,5 +32,5 @@ install:
 script:
     - perl Makefile.PL
     - make
-    - cover -test -report coveralls
     - make install
+    - cover -test -report coveralls
