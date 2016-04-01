@@ -26,8 +26,8 @@ install:
     # Install Perl dependencies
     - travis_retry cpanm --installdeps .
 before_script:
-    - sudo mkdir /var/log/gjs
-    - sudo chown travis /var/log/gjs
+    - mkdir /var/log/gjs
+    - chown travis /var/log/gjs
 script:
     - perl Makefile.PL
     - make
