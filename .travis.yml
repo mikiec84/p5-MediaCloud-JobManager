@@ -21,10 +21,10 @@ addons:
             - libgearman7
 before_install:
     # Install test coverage reporting tool
-    - cpanm Devel::Cover::Report::Coveralls
+    - travis_retry cpanm Devel::Cover::Report::Coveralls
 install:
     # Install Perl dependencies
-    - cpanm --installdeps .
+    - travis_retry cpanm --installdeps .
 before_script:
     - sudo mkdir /var/log/gjs
     - sudo chown travis /var/log/gjs
