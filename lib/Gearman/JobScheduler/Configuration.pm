@@ -23,7 +23,7 @@ has 'gearman_servers' => (
 has 'worker_log_dir' => (
 	is => 'rw',
 	isa => 'Str',
-	default => '/var/log/gjs/'
+	default => '/var/tmp/gearman-jobscheduler-logs/'
 );
 
 # Default email address to send the email from
