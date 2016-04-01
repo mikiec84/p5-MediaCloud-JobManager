@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/pypt/p5-Gearman-JobScheduler.svg?branch=master)](https://travis-ci.org/pypt/p5-Gearman-JobScheduler) [![Coverage Status](https://coveralls.io/repos/pypt/p5-Gearman-JobScheduler/badge.png?branch=master)](https://coveralls.io/r/pypt/p5-Gearman-JobScheduler?branch=master)
+[![Build Status](https://travis-ci.org/pypt/p5-Gearman-JobScheduler.svg?branch=develop)](https://travis-ci.org/pypt/p5-Gearman-JobScheduler) [![Coverage Status](https://coveralls.io/repos/pypt/p5-Gearman-JobScheduler/badge.png?branch=develop)](https://coveralls.io/r/pypt/p5-Gearman-JobScheduler)
 
 # NAME
 
