@@ -40,7 +40,7 @@ my $builder = Module::Build->new(
         'Time::HiRes'           => 0,
         'perl'                  => '5.12.0',
     },
-    script_files => [ "script/gjs_sample_client.pl", "script/gjs_worker.pl" ],
+    script_files   => [ "script/gjs_worker.pl" ],
     add_to_cleanup => [ 'Gearman-JobScheduler-*', 'MANIFEST.bak', 'MANIFEST.SKIP.bak', 'Makefile', 'MYMETA.*', '_build' ],
     create_makefile_pl => 'passthrough',
     meta_merge         => { resources => { repository => 'https://github.com/pypt/p5-Gearman-JobScheduler' } },
