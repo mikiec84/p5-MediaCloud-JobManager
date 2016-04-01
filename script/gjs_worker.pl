@@ -29,22 +29,21 @@ use Gearman::JobScheduler::Configuration;
 use Gearman::JobScheduler::Worker;
 
 use Log::Log4perl qw(:easy);
-Log::Log4perl->easy_init({ level => $DEBUG, utf8=>1, layout => "%d{ISO8601} [%P]: %m%n" });
+Log::Log4perl->easy_init( { level => $DEBUG, utf8 => 1, layout => "%d{ISO8601} [%P]: %m%n" } );
 
 use Pod::Usage;
 
-
 sub main()
 {
-	# Function name, path to function module or path to directory with all functions
-	unless (scalar (@ARGV) == 1) {
-		pod2usage(1);
-	}
-	my $gearman_function_name_or_directory = $ARGV[0];
+    # Function name, path to function module or path to directory with all functions
+    unless ( scalar( @ARGV ) == 1 )
+    {
+        pod2usage( 1 );
+    }
+    my $gearman_function_name_or_directory = $ARGV[ 0 ];
 
-	# Run single worker
-	Gearman::JobScheduler::Worker::run_worker($gearman_function_name_or_directory);
+    # Run single worker
+    Gearman::JobScheduler::Worker::run_worker( $gearman_function_name_or_directory );
 }
-
 
 main();

@@ -9,7 +9,7 @@ with 'Gearman::JobScheduler::AbstractFunction';
 # Run job
 sub run($;$)
 {
-    my ($self, $args) = @_;
+    my ( $self, $args ) = @_;
 
     die "The FailsAlwaysWorker failed (naturally).";
 }
