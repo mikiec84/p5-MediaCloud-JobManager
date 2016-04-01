@@ -1,6 +1,5 @@
 .perltidyrc
 .podtidy-opts
-.travis.yml
 Build.PL
 Changes
 lib/Gearman/JobScheduler.pm
@@ -16,9 +15,8 @@ META.yml			Module meta-data (added by MakeMaker)
 README.mdown
 samples/Addition.pm
 samples/AdditionAlwaysFails.pm
+samples/gjs_sample_client.pl
 samples/NinetyNineBottlesOfBeer.pm
-script/gjs_sample_client.pl
-script/gjs_update_readme.sh
 script/gjs_worker.pl
 t/admin.t
 t/compile.t
