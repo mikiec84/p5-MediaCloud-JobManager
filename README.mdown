@@ -15,47 +15,51 @@ Perl worker / client library for running jobs on [Gearman](http://gearman.org/).
 
 ### Worker
 
-    package AddTwoNumbers;
+```perl
+package AddTwoNumbers;
 
-    use strict;
-    use warnings;
+use strict;
+use warnings;
 
-    use Moose;
-    with 'Gearman::JobScheduler::AbstractFunction';
+use Moose;
+with 'Gearman::JobScheduler::AbstractFunction';
 
-    sub run($;$)
-    {
-        my ( $self, $args ) = @_;
+sub run($;$)
+{
+    my ( $self, $args ) = @_;
 
-        my $number_1 = $args->{ number_1 };
-        my $number_2 = $args->{ number_2 };
+    my $number_1 = $args->{ number_1 };
+    my $number_2 = $args->{ number_2 };
 
-        # Write the sum to the database here
-        say STDERR "Sum: " . ( $number_1 + $number_2 );
+    # Write the sum to the database here
+    say STDERR "Sum: " . ( $number_1 + $number_2 );
 
-        return 1;
-    }
+    return 1;
+}
 
-    no Moose;    # gets rid of scaffolding
+no Moose;    # gets rid of scaffolding
 
-    # Return package name instead of 1 or otherwise worker.pl won't know the
-    # name of the package it's loading
-    __PACKAGE__;
+# Return package name instead of 1 or otherwise worker.pl won't know the
+# name of the package it's loading
+__PACKAGE__;
+```
 
 ### Client
 
-    use AddTwoNumbers;
+```perl
+use AddTwoNumbers;
 
-    my $args = { number_1 => 3, number_2 => 4 };
+my $args = { number_1 => 3, number_2 => 4 };
 
-    # Run locally, like any other function
-    AddTwoNumbers->run_locally( $args );
+# Run locally, like any other function
+AddTwoNumbers->run_locally( $args );
 
-    # Run on Gearman, wait for the function to finish
-    AddTwoNumbers->run_on_gearman( $args );
+# Run on Gearman, wait for the function to finish
+AddTwoNumbers->run_on_gearman( $args );
 
-    # Add to Gearman's queue and return instantly, don't wait for the function to finish
-    AddTwoNumbers->enqueue_on_gearman( $args );
+# Add to Gearman's queue and return instantly, don't wait for the function to finish
+AddTwoNumbers->enqueue_on_gearman( $args );
+```
 
 
 # Development Notes
