@@ -5,7 +5,7 @@ WriteMakefile(
     NAME          => 'Gearman::JobScheduler',
     AUTHOR        => 'Linas Valiukas <lvaliukas@cyber.law.harvard.edu>',
     VERSION_FROM  => 'lib/Gearman/JobScheduler.pm',
-    ABSTRACT => 'Gearman job scheduler',
+    ABSTRACT => 'Perl worker / client library for running jobs on Gearman',
     ( $ExtUtils::MakeMaker::VERSION >= 6.3002
         ? ( 'LICENSE' => 'perl' )
         : () ),
