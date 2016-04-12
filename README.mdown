@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/pypt/p5-Gearman-JobScheduler.svg?branch=develop)](https://travis-ci.org/pypt/p5-Gearman-JobScheduler) [![Coverage Status](https://coveralls.io/repos/github/pypt/p5-Gearman-JobScheduler/badge.svg?branch=develop)](https://coveralls.io/github/pypt/p5-Gearman-JobScheduler)
+[![Build Status](https://travis-ci.org/berkmancenter/p5-Gearman-JobScheduler.svg?branch=develop)](https://travis-ci.org/berkmancenter/p5-Gearman-JobScheduler) [![Coverage Status](https://coveralls.io/repos/github/berkmancenter/p5-Gearman-JobScheduler/badge.svg?branch=develop)](https://coveralls.io/github/berkmancenter/p5-Gearman-JobScheduler)
 
 # Gearman::JobScheduler
 

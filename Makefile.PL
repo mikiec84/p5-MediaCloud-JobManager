@@ -45,8 +45,8 @@ WriteMakefile(
     META_MERGE => {
       resources => {
         type => 'git',
-        url => 'git://github.com/pypt/p5-Gearman-JobScheduler.git',
-        web => 'https://github.com/pypt/p5-Gearman-JobScheduler',
+        url => 'git://github.com/berkmancenter/p5-Gearman-JobScheduler.git',
+        web => 'https://github.com/berkmancenter/p5-Gearman-JobScheduler',
       }
     },
 
