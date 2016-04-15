@@ -27,7 +27,7 @@
 ^MANIFEST\.SKIP
 
 # Avoid archives of this distribution
-\bGearman-JobScheduler-[\d\.\_]+
+\bMediaCloud-JobManager-[\d\.\_]+
 ^MYMETA\.yml$
 ^MYMETA\.json$
 

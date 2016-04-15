@@ -2,10 +2,10 @@ use 5.016003;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME          => 'Gearman::JobScheduler',
-    AUTHOR        => 'Linas Valiukas <lvaliukas@cyber.law.harvard.edu>',
-    VERSION_FROM  => 'lib/Gearman/JobScheduler.pm',
-    ABSTRACT => 'Perl worker / client library for running jobs on Gearman',
+    NAME         => 'MediaCloud::JobManager',
+    AUTHOR       => 'Linas Valiukas <lvaliukas@cyber.law.harvard.edu>',
+    VERSION_FROM => 'lib/MediaCloud/JobManager.pm',
+    ABSTRACT     => 'Perl worker / client library for running jobs asynchronously',
     ( $ExtUtils::MakeMaker::VERSION >= 6.3002
         ? ( 'LICENSE' => 'perl' )
         : () ),
@@ -41,13 +41,15 @@ WriteMakefile(
         'Test::Strict'          => 0,
         'Time::HiRes'           => 0,
     },
-    clean => { FILES => 'Gearman-JobScheduler-* MANIFEST.bak MANIFEST.SKIP.bak Makefile Makefile.old MYMETA.* _build pm_to_blib' },
+    test => { TESTS => 't/*.t t/brokers/*.t', RECURSIVE_TEST_FILES => 1 },
+    clean =>
+      { FILES => 'MediaCloud-JobManager-* MANIFEST.bak MANIFEST.SKIP.bak Makefile Makefile.old MYMETA.* _build pm_to_blib' },
     META_MERGE => {
-      resources => {
-        type => 'git',
-        url => 'git://github.com/berkmancenter/p5-Gearman-JobScheduler.git',
-        web => 'https://github.com/berkmancenter/p5-Gearman-JobScheduler',
-      }
+        resources => {
+            type => 'git',
+            url  => 'git://github.com/berkmancenter/p5-Gearman-JobScheduler.git',
+            web  => 'https://github.com/berkmancenter/p5-Gearman-JobScheduler',
+        }
     },
 
 );

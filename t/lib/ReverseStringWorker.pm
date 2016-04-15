@@ -3,8 +3,9 @@ package ReverseStringWorker;
 use strict;
 use warnings;
 
-use Moose;
-with 'Gearman::JobScheduler::AbstractFunction';
+use Moose::Role;
+use lib qw|lib/ t/lib/ t/brokers/|;
+with 'MediaCloud::JobManager::Job';
 
 use File::Slurp;
 

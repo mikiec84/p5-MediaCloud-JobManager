@@ -5,7 +5,7 @@ use warnings;
 use Modern::Perl "2012";
 
 use Moose;
-with 'Gearman::JobScheduler::AbstractFunction';
+with 'MediaCloud::JobManager::Job';
 
 # Run job
 sub run($;$)
@@ -27,7 +27,7 @@ sub run($;$)
 
 sub priority()
 {
-    return GJS_JOB_PRIORITY_LOW();
+    return MJM_JOB_PRIORITY_LOW();
 }
 
 no Moose;    # gets rid of scaffolding

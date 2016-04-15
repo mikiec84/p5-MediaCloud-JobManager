@@ -5,7 +5,7 @@ use warnings;
 use Modern::Perl "2012";
 
 use Moose;
-with 'Gearman::JobScheduler::AbstractFunction';
+with 'MediaCloud::JobManager::Job';
 
 # Run job
 sub run($;$)

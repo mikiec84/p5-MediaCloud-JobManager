@@ -22,7 +22,7 @@ addons:
 env:
     global:
         # Where to write logs
-        - GJS_WORKER_LOG_DIR=~/gearman-jobscheduler-logs/
+        - MJM_WORKER_LOG_DIR=~/mediacloud-jobmanager-logs/
 before_install:
     # Install test coverage reporting tool
     - travis_retry cpanm --notest Devel::Cover::Report::Coveralls

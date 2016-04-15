@@ -5,7 +5,7 @@ use warnings;
 use Modern::Perl "2012";
 
 use Moose;
-with 'Gearman::JobScheduler::AbstractFunction';
+with 'MediaCloud::JobManager::Job';
 
 use Time::HiRes qw(usleep nanosleep);
 use Data::Dumper;
@@ -65,7 +65,7 @@ sub notify_on_failure()
 
 # Unify logs into a single one (i.e. write log to
 # "NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log" instead of
-# "NinetyNineBottlesOfBeer/<gearman_job_id>.<gjs_job_id>.log")
+# "NinetyNineBottlesOfBeer/<job_id>.<mjm_job_id>.log")
 sub unify_logs()
 {
     return 1;

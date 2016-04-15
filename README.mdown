@@ -1,11 +1,13 @@
-[![Build Status](https://travis-ci.org/berkmancenter/p5-Gearman-JobScheduler.svg?branch=develop)](https://travis-ci.org/berkmancenter/p5-Gearman-JobScheduler) [![Coverage Status](https://coveralls.io/repos/github/berkmancenter/p5-Gearman-JobScheduler/badge.svg?branch=develop)](https://coveralls.io/github/berkmancenter/p5-Gearman-JobScheduler)
+[![Build Status](https://travis-ci.org/pypt/p5-Gearman-JobScheduler.svg?branch=develop)](https://travis-ci.org/pypt/p5-Gearman-JobScheduler) [![Coverage Status](https://coveralls.io/repos/github/pypt/p5-Gearman-JobScheduler/badge.svg?branch=develop)](https://coveralls.io/github/pypt/p5-Gearman-JobScheduler)
 
-# Gearman::JobScheduler
+# MediaCloud::JobManager
 
-Perl worker / client library for running jobs on [Gearman](http://gearman.org/).
+(Yet another) Perl worker / client library for running jobs asynchronously.
 
 ## Features
 
+* Job brokers supported:
+    * [Gearman](http://gearman.org/)
 * Automattic worker logging via [Log::Log4perl](http://search.cpan.org/~mschilli/Log-Log4perl/)
 * Restarting failed jobs
 * Progress reporting
@@ -22,7 +24,7 @@ use strict;
 use warnings;
 
 use Moose;
-with 'Gearman::JobScheduler::AbstractFunction';
+with 'MediaCloud::JobManager::Job';
 
 sub run($;$)
 {
@@ -54,11 +56,11 @@ my $args = { number_1 => 3, number_2 => 4 };
 # Run locally, like any other function
 AddTwoNumbers->run_locally( $args );
 
-# Run on Gearman, wait for the function to finish
-AddTwoNumbers->run_on_gearman( $args );
+# Run remotely, wait for the function to finish
+AddTwoNumbers->run_remotely( $args );
 
-# Add to Gearman's queue and return instantly, don't wait for the function to finish
-AddTwoNumbers->enqueue_on_gearman( $args );
+# Add to broker's queue and return instantly, don't wait for the function to finish
+AddTwoNumbers->add_to_queue( $args );
 ```
 
 

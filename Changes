@@ -1,4 +1,4 @@
-Revision history for Perl module Gearman::JobScheduler
+Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
 0.16   2014-07-01
     * Fix support for Perl 5.19+.
@@ -57,7 +57,7 @@ Revision history for Perl module Gearman::JobScheduler
     * Handle (log) undefined arguments to run() correctly.
 
 0.05   2013-10-07
-    * Use SHA256 hashes for GJS-generated unique job identifiers because the
+    * Use SHA256 hashes for Perl-generated unique job identifiers because the
       job identifier is limited to 64 bytes by Gearman which is usually not
       enough.
 
