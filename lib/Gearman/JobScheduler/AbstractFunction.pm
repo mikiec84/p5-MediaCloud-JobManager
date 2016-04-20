@@ -30,7 +30,6 @@ use Moose::Role 2.1005;
 
 use Gearman::JobScheduler;	# helper subroutines
 use Gearman::JobScheduler::Configuration;
-use Gearman::JobScheduler::ErrorLogTrapper;
 
 use Gearman::XS qw(:constants);
 use Gearman::XS::Client;
@@ -360,10 +359,6 @@ sub run_locally($;$$$)
 		layout => "%d{ISO8601} [%P]: %m"
 	});
 
-
-	# Tie STDOUT / STDERR to Log4perl handler
-	tie *STDOUT, "Gearman::JobScheduler::ErrorLogTrapper";
-	tie *STDERR, "Gearman::JobScheduler::ErrorLogTrapper";
 
 	my $result;
 

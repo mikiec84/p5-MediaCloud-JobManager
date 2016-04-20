@@ -42,7 +42,6 @@ use_ok( 'Gearman::JobScheduler' );
 use_ok( 'Gearman::JobScheduler::AbstractFunction' );
 use_ok( 'Gearman::JobScheduler::Admin' );
 use_ok( 'Gearman::JobScheduler::Configuration' );
-use_ok( 'Gearman::JobScheduler::ErrorLogTrapper' );
 use_ok( 'Gearman::JobScheduler::Worker' );
 
 # Test workers
