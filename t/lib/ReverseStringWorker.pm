@@ -3,20 +3,22 @@ package ReverseStringWorker;
 use strict;
 use warnings;
 
-use Moose;
-with 'Gearman::JobScheduler::AbstractFunction';
+use Moose::Role;
+use lib qw|lib/ t/lib/ t/brokers/|;
+with 'MediaCloud::JobManager::Job';
 
 use File::Slurp;
 
 # Run job
 sub run($;$)
 {
-    my ($self, $args) = @_;
+    my ( $self, $args ) = @_;
 
-    my $string = $args->{ string };
+    my $string           = $args->{ string };
     my $write_results_to = $args->{ write_results_to };
 
-    unless (defined $string) {
+    unless ( defined $string )
+    {
         die "Operand 'string' must be defined.";
     }
 
@@ -24,9 +26,11 @@ sub run($;$)
 
     $string = reverse( $string );
 
-    if ( $write_results_to ) {
+    if ( $write_results_to )
+    {
         say STDERR "Will write results to '$write_results_to'";
-        unless ( write_file( $write_results_to, $string )) {
+        unless ( write_file( $write_results_to, $string ) )
+        {
             die "Unable to write to file '$write_results_to'";
         }
     }

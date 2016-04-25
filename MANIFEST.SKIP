@@ -1,5 +1,7 @@
 .git
 .travis.yml
+.perltidyrc
+.podtidy-opts
 
 # OS X
 \.DS_Store
@@ -25,6 +27,9 @@
 ^MANIFEST\.SKIP
 
 # Avoid archives of this distribution
-\bGearman-JobScheduler-[\d\.\_]+
+\bMediaCloud-JobManager-[\d\.\_]+
 ^MYMETA\.yml$
 ^MYMETA\.json$
+
+# Avoid Devel::Cover output
+cover_db

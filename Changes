@@ -1,4 +1,17 @@
-Revision history for Perl module Gearman::JobScheduler
+Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
+
+0.17   2016-04-26
+    * Rename from Gearman::JobScheduler to MediaCloud::JobManager.
+    * Rename run_on_gearman() to run_remotely().
+    * Rename enqueue_on_gearman() to add_to_queue().
+    * Refactor the module to be job broker-agnostic in order to later add
+      additional job broker support (e.g. RabbitMQ via Celery protocol).
+    * Modernize Makefile.PL.
+    * Update README.
+
+0.16.1   2016-04-20
+    * Remove Log::Log4perl's error log appender because together with Media
+      Cloud's usage of Log::Log4perl it ends up in a deep recursion.
 
 0.16.1   2016-04-20
     * Remove Log::Log4perl's error log appender because together with Media
@@ -61,7 +74,7 @@ Revision history for Perl module Gearman::JobScheduler
     * Handle (log) undefined arguments to run() correctly.
 
 0.05   2013-10-07
-    * Use SHA256 hashes for GJS-generated unique job identifiers because the
+    * Use SHA256 hashes for Perl-generated unique job identifiers because the
       job identifier is limited to 64 bytes by Gearman which is usually not
       enough.
 
