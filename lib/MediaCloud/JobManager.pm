@@ -47,9 +47,6 @@ use Digest::SHA qw(sha256_hex);
 
 use Carp;
 
-use Email::MIME;
-use Email::Sender::Simple qw(try_to_sendmail);
-
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init(
     {
@@ -254,59 +251,6 @@ sub _job_id_from_handle($)
     }
 
     return $job_id;
-}
-
-# Send email to someone; returns 1 on success, 0 on failure
-sub _send_email($$$)
-{
-    my ( $subject, $message, $config ) = @_;
-
-    unless ( scalar( @{ $config->notifications_emails } ) )
-    {
-        # No one to send mail to
-        return 1;
-    }
-
-    my $from_email = $config->notifications_from_address;
-    $subject = ( $config->notifications_subject_prefix ? $config->notifications_subject_prefix . ' ' : '' ) . $subject;
-
-    my $message_body = <<"EOF";
-Hello,
-
-$message
-
--- 
-MediaCloud::JobManager
-
-EOF
-
-    # DEBUG("Will send email to: " . Dumper($config->notifications_emails));
-    # DEBUG("Subject: $subject");
-    # DEBUG("Message: $message_body");
-
-    foreach my $to_email ( @{ $config->notifications_emails } )
-    {
-        my $email = Email::MIME->create(
-            header_str => [
-                From    => $from_email,
-                To      => $to_email,
-                Subject => $subject,
-            ],
-            attributes => {
-                encoding => 'quoted-printable',
-                charset  => 'UTF-8',
-            },
-            body_str => $message_body
-        );
-
-        unless ( try_to_sendmail( $email ) )
-        {
-            WARN( "Unable to send email to $to_email: $!" );
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 1;

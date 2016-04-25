@@ -133,25 +133,6 @@ sub unique()
     return 1;
 }
 
-=head3 (static) C<notify_on_failure()>
-
-Return true if the client / worker should send error report by email when the
-function fails.
-
-Returns true if the MediaCloud::JobManager client (in case C<run_locally()> is
-used) or worker (in case C<run_remotely()> or C<add_to_queue()> is being used)
-should send an email when the function fails to run.
-
-Default implementation of this subroutine returns "true".
-
-=cut
-
-sub notify_on_failure()
-{
-    # By default jobs will send notifications when they fail
-    return 1;
-}
-
 =head3 (static) C<configuration()>
 
 Return an instance or a subclass of C<MediaCloud::JobManager::Configuration> to
@@ -405,30 +386,6 @@ sub run_locally($;$$)
 
     if ( $error )
     {
-        # Send email notification (if needed)
-        eval {
-            if ( $class->notify_on_failure() )
-            {
-
-                my $now      = DateTime->now()->strftime( '%a, %d %b %Y %H:%M:%S %z' );
-                my $hostname = hostname;
-
-                my $message_subject = 'Function "' . $function_name . '" failed';
-                my $message_body    = <<EOF;
-Function "$function_name" failed while running on "$hostname" at $now because:
-
-<snip>
-$error
-</snip>
-EOF
-                MediaCloud::JobManager::_send_email( $message_subject, $message_body, $config );
-            }
-        };
-        if ( $@ )
-        {
-            $error = "Failed to send notification email informing about the job failure: $@\nJob failed because: $error";
-        }
-
         # Print out to worker's STDERR and die()
         LOGDIE( "$error" );
     }

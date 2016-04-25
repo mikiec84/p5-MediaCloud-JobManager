@@ -57,12 +57,6 @@ sub unique()
     return 1;
 }
 
-# Notify by email on failure?
-sub notify_on_failure()
-{
-    return 1;
-}
-
 no Moose;    # gets rid of scaffolding
 
 # Return package name instead of 1 or otherwise worker.pl won't know the name of the package it's loading

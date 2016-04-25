@@ -17,8 +17,6 @@ WriteMakefile(
         'Data::Dumper'          => 0,
         'Data::UUID'            => 0,
         'DateTime'              => 0,
-        'Email::MIME'           => 0,
-        'Email::Sender::Simple' => 0,
         'File::Path'            => 0,
         'File::Slurp'           => 0,
         'File::Temp'            => 0,

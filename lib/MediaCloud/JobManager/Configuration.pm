@@ -20,29 +20,6 @@ has 'broker' => (
     default => sub { return MediaCloud::JobManager::Broker::Gearman->new(); },
 );
 
-# Default email address to send the email from
-has 'notifications_from_address' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => 'mjm_donotreply@example.com'
-);
-
-# Notification email subject prefix
-has 'notifications_subject_prefix' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => '[MediaCloud::JobManager]'
-);
-
-# Emails that should receive notifications about failed jobs
-has 'notifications_emails' => (
-    is  => 'rw',
-    isa => 'ArrayRef[Str]',
-
-    # No one gets no mail by default:
-    default => sub { [] }
-);
-
-no Moose;    # gets rid of scaffolding
+no Moose;                 # gets rid of scaffolding
 
 1;

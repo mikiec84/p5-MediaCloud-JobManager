@@ -11,7 +11,6 @@
 * Automattic worker logging via [Log::Log4perl](http://search.cpan.org/~mschilli/Log-Log4perl/)
 * Restarting failed jobs
 * Progress reporting
-* Email reports about failed jobs
 
 ## Sample
 

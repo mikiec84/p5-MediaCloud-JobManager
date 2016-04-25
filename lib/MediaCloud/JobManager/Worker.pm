@@ -61,16 +61,6 @@ sub start_worker($)
     INFO( "Starting function '$function_name' from '$function_name_or_path'." );
 
     INFO( "Job priority: " . $function_name->priority() );
-    if ( scalar @{ $config->notifications_emails } )
-    {
-        INFO( 'Will send notifications about failed jobs to: ' . join( ' ', @{ $config->notifications_emails } ) );
-        INFO( '(emails will be sent from "' .
-              $config->notifications_from_address . '" and prefixed with "' . $config->notifications_subject_prefix . '")' );
-    }
-    else
-    {
-        INFO( 'Will not send notifications anywhere about failed jobs.' );
-    }
 
     $config->{ broker }->start_worker( $function_name );
 
