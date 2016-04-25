@@ -77,17 +77,6 @@ send an email when the function fails to run.
 
 Default implementation of this subroutine returns "true".
 
-### (static) `unify_logs()`
-
-Return true if the worker should write logs of each of the jobs into a single
-file as opposed to writing into separate files.
-
-Returns true if GJS workers should write their job logs into a single file,
-i.e. into `NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log` instead of
-`NinetyNineBottlesOfBeer/gearman_job_id.gjs_job_id.log`.
-
-Default implementation of this subroutine returns "false".
-
 ### (static) `configuration()`
 
 Return an instance or a subclass of `Gearman::JobScheduler::Configuration` to

@@ -67,15 +67,6 @@ sub notify_on_failure()
 }
 
 
-# Unify logs into a single one (i.e. write log to
-# "NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log" instead of
-# "NinetyNineBottlesOfBeer/<gearman_job_id>.<gjs_job_id>.log")
-sub unify_logs()
-{
-	return 1;
-}
-
-
 no Moose;    # gets rid of scaffolding
 
 

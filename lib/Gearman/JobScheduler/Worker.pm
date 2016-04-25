@@ -60,7 +60,6 @@ sub _worker($)
 	my $config = $gearman_function_name->configuration();
 
 	INFO("Will use Gearman servers: " . join(' ', @{$config->gearman_servers}));
-	INFO("Will write logs to: " . $config->worker_log_dir);
 	if (scalar @{$config->notifications_emails}) {
 		INFO('Will send notifications about failed jobs to: ' . join(' ', @{$config->notifications_emails}));
 		INFO('(emails will be sent from "' . $config->notifications_from_address

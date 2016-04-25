@@ -1,5 +1,9 @@
 Revision history for Perl module Gearman::JobScheduler
 
+0.16.1   2016-04-20
+    * Remove Log::Log4perl's error log appender because together with Media
+      Cloud's usage of Log::Log4perl it ends up in a deep recursion.
+
 0.16   2014-07-01
     * Fix support for Perl 5.19+.
     * Remove support for "timeout()" subroutine because it wasn't working as
