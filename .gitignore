@@ -19,3 +19,5 @@ pm_to_blib
 # Devel::Cover
 cover_db/
 
+# Distribution tarballs after running "make dist"
+*.tar.gz
