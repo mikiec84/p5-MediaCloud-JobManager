@@ -13,7 +13,6 @@ use MediaCloud::JobManager;
 use MediaCloud::JobManager::Job;
 use MediaCloud::JobManager::Admin;
 use MediaCloud::JobManager::Configuration;
-use MediaCloud::JobManager::ErrorLogTrapper;
 use MediaCloud::JobManager::Worker;
 
 # Test workers

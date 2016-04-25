@@ -63,14 +63,6 @@ sub notify_on_failure()
     return 1;
 }
 
-# Unify logs into a single one (i.e. write log to
-# "NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log" instead of
-# "NinetyNineBottlesOfBeer/<job_id>.<mjm_job_id>.log")
-sub unify_logs()
-{
-    return 1;
-}
-
 no Moose;    # gets rid of scaffolding
 
 # Return package name instead of 1 or otherwise worker.pl won't know the name of the package it's loading

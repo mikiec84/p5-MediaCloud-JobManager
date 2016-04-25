@@ -20,7 +20,6 @@ WriteMakefile(
         'Email::MIME'           => 0,
         'Email::Sender::Simple' => 0,
         'File::Path'            => 0,
-        'File::ReadBackwards'   => 0,
         'File::Slurp'           => 0,
         'File::Temp'            => 0,
         'Gearman::XS'           => 0,

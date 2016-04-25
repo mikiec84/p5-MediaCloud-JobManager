@@ -4,7 +4,6 @@ lib/MediaCloud/JobManager/Admin.pm
 lib/MediaCloud/JobManager/Broker.pm
 lib/MediaCloud/JobManager/Broker/Gearman.pm
 lib/MediaCloud/JobManager/Configuration.pm
-lib/MediaCloud/JobManager/ErrorLogTrapper.pm
 lib/MediaCloud/JobManager/Job.pm
 lib/MediaCloud/JobManager/Worker.pm
 LICENSE

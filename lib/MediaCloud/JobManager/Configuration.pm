@@ -20,13 +20,6 @@ has 'broker' => (
     default => sub { return MediaCloud::JobManager::Broker::Gearman->new(); },
 );
 
-# Where should the worker put the logs
-has 'worker_log_dir' => (
-    is      => 'rw',
-    isa     => 'Str',
-    default => $ENV{ MJM_WORKER_LOG_DIR } || '/var/tmp/mediacloud-jobmanager-logs/'
-);
-
 # Default email address to send the email from
 has 'notifications_from_address' => (
     is      => 'rw',

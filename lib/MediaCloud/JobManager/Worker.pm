@@ -60,7 +60,6 @@ sub start_worker($)
 
     INFO( "Starting function '$function_name' from '$function_name_or_path'." );
 
-    INFO( "Will write logs to: " . $config->worker_log_dir );
     INFO( "Job priority: " . $function_name->priority() );
     if ( scalar @{ $config->notifications_emails } )
     {

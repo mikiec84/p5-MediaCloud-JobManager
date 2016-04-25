@@ -31,20 +31,25 @@ use Moose::Role 2.1005;
 
 use MediaCloud::JobManager;    # helper subroutines
 use MediaCloud::JobManager::Configuration;
-use MediaCloud::JobManager::ErrorLogTrapper;
 
 use IO::File;
 use Capture::Tiny ':all';
 use Time::HiRes;
 use Data::Dumper;
 use DateTime;
-use File::ReadBackwards;
 use Readonly;
 use Sys::Hostname;
 
 # used for capturing STDOUT and STDERR output of each job and timestamping it;
 # initialized before each job
 use Log::Log4perl qw(:easy);
+Log::Log4perl->easy_init(
+    {
+        level  => $DEBUG,
+        utf8   => 1,
+        layout => "%d{ISO8601} [%P]: %m%n"
+    }
+);
 
 =head1 ABSTRACT INTERFACE
 
@@ -145,25 +150,6 @@ sub notify_on_failure()
 {
     # By default jobs will send notifications when they fail
     return 1;
-}
-
-=head3 (static) C<unify_logs()>
-
-Return true if the worker should write logs of each of the jobs into a single
-file as opposed to writing into separate files.
-
-Returns true if MediaCloud::JobManager workers should write their job logs into
-a single file, i.e. into C<NinetyNineBottlesOfBeer/NinetyNineBottlesOfBeer.log>
-instead of C<NinetyNineBottlesOfBeer/job_id.mjm_job_id.log>.
-
-Default implementation of this subroutine returns "false".
-
-=cut
-
-sub unify_logs()
-{
-    # By default, write log of each job to a separate file
-    return 0;
 }
 
 =head3 (static) C<configuration()>
@@ -319,39 +305,12 @@ sub run_locally($;$$)
         die "Unable to determine unique MediaCloud::JobManager job ID";
     }
 
-    my $log_path = MediaCloud::JobManager::_worker_log_path( $function_name, $mjm_job_id, $config );
-    my $starting_job_message;
-    if ( -f $log_path and ( !$function_name->unify_logs() ) )
-    {
-        # Worker crashed last time and now tries to write to the same log path
-        # (will append to the log)
-        $starting_job_message = "Restarting job ID \"$mjm_job_id\", logging to \"$log_path\" ...";
-    }
-    else
-    {
-        $starting_job_message = "Starting job ID \"$mjm_job_id\", logging to \"$log_path\" ...";
-    }
-
+    my $starting_job_message = "Starting job ID \"$mjm_job_id\"...";
     my $finished_job_message;
 
-    _reset_log4perl();
     INFO( $starting_job_message );
 
-    Log::Log4perl->easy_init(
-        {
-            level  => $DEBUG,
-            utf8   => 1,
-            file   => ">>$log_path",           # do not use STDERR / STDOUT here because it would end up with recursion
-            layout => "%d{ISO8601} [%P]: %m"
-        }
-    );
-
-    # Tie STDOUT / STDERR to Log4perl handler
-    tie *STDOUT, "MediaCloud::JobManager::ErrorLogTrapper";
-    tie *STDERR, "MediaCloud::JobManager::ErrorLogTrapper";
-
     my $result;
-
     eval {
 
         my $d = Data::Dumper->new( [ $args ], [ 'args' ] );
@@ -439,7 +398,6 @@ sub run_locally($;$$)
     untie *STDERR;
     untie *STDOUT;
 
-    _reset_log4perl();
     if ( $finished_job_message )
     {
         INFO( $finished_job_message );
@@ -455,38 +413,12 @@ sub run_locally($;$$)
                 my $now      = DateTime->now()->strftime( '%a, %d %b %Y %H:%M:%S %z' );
                 my $hostname = hostname;
 
-                # Tail the log file
-                my Readonly $how_many_lines = 50;
-                my $last_lines = '';
-                my $lines_read;
-                my $bw = File::ReadBackwards->new( $log_path ) or die "Unable to open '$log_path' for tailing: $!";
-                for ( $lines_read = 1 ; $lines_read <= $how_many_lines ; ++$lines_read )
-                {
-                    my $log_line = $bw->readline;
-                    if ( defined $log_line )
-                    {
-                        $last_lines = "$log_line$last_lines";
-                    }
-                    else
-                    {
-                        last;
-                    }
-                }
-
                 my $message_subject = 'Function "' . $function_name . '" failed';
                 my $message_body    = <<EOF;
 Function "$function_name" failed while running on "$hostname" at $now because:
 
 <snip>
 $error
-</snip>
-
-Location of the log: $log_path
-
-Last $lines_read lines of the log:
-
-<snip>
-$last_lines
 </snip>
 EOF
                 MediaCloud::JobManager::_send_email( $message_subject, $message_body, $config );
@@ -646,18 +578,6 @@ sub name($)
 # temporarily place job handle to this variable so that set_progress() helper
 # can later use it
 has '_job' => ( is => 'rw' );
-
-# (static) Reset Log::Log4perl to write to the STDERR / STDOUT and not to file
-sub _reset_log4perl()
-{
-    Log::Log4perl->easy_init(
-        {
-            level  => $DEBUG,
-            utf8   => 1,
-            layout => "%d{ISO8601} [%P]: %m%n"
-        }
-    );
-}
 
 no Moose;    # gets rid of scaffolding
 

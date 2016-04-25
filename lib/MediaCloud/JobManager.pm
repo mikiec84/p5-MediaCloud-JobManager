@@ -33,7 +33,7 @@ any later version of Perl 5 you may have available.
 
 package MediaCloud::JobManager;
 
-our $VERSION = '0.16';
+our $VERSION = '0.16.1';
 
 use strict;
 use warnings;
@@ -42,7 +42,6 @@ use Modern::Perl "2012";
 use MediaCloud::JobManager::Configuration;
 
 use Data::UUID;
-use File::Path qw(make_path);
 
 use Digest::SHA qw(sha256_hex);
 
@@ -110,67 +109,6 @@ sub job_status($$)
     my $config = $function_name->configuration();
 
     return $config->{ broker }->job_status( $function_name, $job_id );
-}
-
-=head2 (static) C<log_path_for_job($function_name, $job_handle)>
-
-Get a path to where the job is being logged to.
-
-(Note: if the job is not running or finished, the log path will be empty.)
-
-Parameters:
-
-=over 4
-
-=item * Function name (e.g. "NinetyNineBottlesOfBeer")
-
-=item * Job ID (e.g. "H:localhost.localdomain:8")
-
-=back
-
-Returns log path where the job's log is being written, e.g.
-"/var/log/mjm/NinetyNineBottlesOfBeer/H_tundra.local_93.NinetyNineBottlesOfBeer().log"
-
-Returns C<undef> if no log path was found.
-
-die()s on error.
-
-=cut
-
-sub log_path_for_job($$)
-{
-    my ( $function_name, $job_handle ) = @_;
-
-    my $config = $function_name->configuration();
-
-    # If the job is not running, the log path will not be available
-    my $job_status = job_status( $function_name, $job_handle );
-    if ( ( !$job_status ) or ( !$job_status->{ running } ) )
-    {
-        WARN( "Job '$job_handle' is not running; either it is finished already or hasn't started yet. " .
-              "Thus, the path returned might not yet exist." );
-    }
-
-    my $job_id = _job_id_from_handle( $job_handle );
-
-    # Sanitize the ID just like run_locally() would
-    $job_id = _sanitize_for_path( $job_id );
-
-    my $log_path_glob = _worker_log_path( $function_name, $job_id, $config );
-    $log_path_glob =~ s/\.log$/\*\.log/;
-    my @log_paths = glob $log_path_glob;
-
-    if ( scalar @log_paths == 0 )
-    {
-        INFO( "Log path not found for expression: $log_path_glob" );
-        return undef;
-    }
-    if ( scalar @log_paths > 1 )
-    {
-        LOGDIE( "Two or more logs found for expression: $log_path_glob" );
-    }
-
-    return $log_paths[ 0 ];
 }
 
 # (static) Return an unique job ID that will identify a particular job with its
@@ -316,49 +254,6 @@ sub _job_id_from_handle($)
     }
 
     return $job_id;
-}
-
-# (static) Return worker log path for the function name and MediaCloud::JobManager job ID
-sub _worker_log_path($$$)
-{
-    my ( $function_name, $job_id, $config ) = @_;
-
-    my $log_path = _init_and_return_worker_log_dir( $function_name, $config );
-    if ( $function_name->unify_logs() )
-    {
-        $log_path .= _sanitize_for_path( $function_name ) . '.log';
-    }
-    else
-    {
-        $log_path .= _sanitize_for_path( $job_id ) . '.log';
-    }
-
-    return $log_path;
-}
-
-# (static) Initialize (create missing directories) and return a worker log directory path (with trailing slash)
-sub _init_and_return_worker_log_dir($$)
-{
-    my ( $function_name, $config ) = @_;
-
-    my $worker_log_dir = $config->worker_log_dir;
-    unless ( $worker_log_dir )
-    {
-        LOGDIE( "Worker log directory is undefined." );
-    }
-
-    # Add a trailing slash
-    $worker_log_dir =~ s!/*$!/!;
-
-    # Append the function name
-    $worker_log_dir .= _sanitize_for_path( $function_name ) . '/';
-
-    unless ( -d $worker_log_dir )
-    {
-        make_path( $worker_log_dir );
-    }
-
-    return $worker_log_dir;
 }
 
 # Send email to someone; returns 1 on success, 0 on failure
