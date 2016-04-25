@@ -19,13 +19,6 @@ has 'gearman_servers' => (
 	default => sub { [ '127.0.0.1:4730' ] }
 );
 
-# Where should the worker put the logs
-has 'worker_log_dir' => (
-	is => 'rw',
-	isa => 'Str',
-	default => '/var/log/gjs/'
-);
-
 # Default email address to send the email from
 has 'notifications_from_address' => (
 	is => 'rw',

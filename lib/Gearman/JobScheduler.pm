@@ -25,7 +25,6 @@ use JSON;
 my $json = JSON->new->allow_nonref->canonical->utf8;
 
 use Data::UUID;
-use File::Path qw(make_path);
 
 use Digest::SHA qw(sha256_hex);
 
@@ -117,68 +116,6 @@ sub job_status($$;$)
 	return $response;
 }
 
-
-
-=head2 (static) C<log_path_for_gearman_job($function_name, $gearman_job_handle[, $config])>
-
-Get a path to where Gearman expects to save the job's log.
-
-(Note: if the job is not running or finished, the log path will be empty.)
-
-Parameters:
-
-=over 4
-
-=item * Gearman function name (e.g. "NinetyNineBottlesOfBeer")
-
-=item * Gearman job ID (e.g. "H:localhost.localdomain:8")
-
-=item * (optional) Instance of Gearman::JobScheduler::Configuration
-
-=back
-
-Returns log path where the job's log is being written, e.g.
-"/var/log/gjs/NinetyNineBottlesOfBeer/H_tundra.local_93.NinetyNineBottlesOfBeer().log"
-
-Returns C<undef> if no log path was found.
-
-die()s on error.
-
-=cut
-sub log_path_for_gearman_job($$;$)
-{
-	my ($function_name, $gearman_job_handle, $config) = @_;
-
-	unless ($config) {
-		$config = Gearman::JobScheduler::_default_configuration($function_name);
-	}
-
-	# If the job is not running, the log path will not be available
-	my $job_status = job_status($function_name, $gearman_job_handle, $config);
-	if ((! $job_status) or (! $job_status->{running})) {
-		WARN("Job '$gearman_job_handle' is not running; either it is finished already or hasn't started yet. "
-		   . "Thus, the path returned might not yet exist.");
-	}
-
-	my $gearman_job_id = _gearman_job_id_from_handle($gearman_job_handle);
-
-	# Sanitize the ID just like run_locally() would
-	$gearman_job_id = _sanitize_for_path($gearman_job_id);
-
-	my $log_path_glob = _worker_log_path($function_name, $gearman_job_id, $config);
-	$log_path_glob =~ s/\.log$/\*\.log/;
-	my @log_paths = glob $log_path_glob;
-
-	if (scalar @log_paths == 0) {
-		INFO("Log path not found for expression: $log_path_glob");
-		return undef;
-	}
-	if (scalar @log_paths > 1) {
-		LOGDIE("Two or more logs found for expression: $log_path_glob");
-	}
-
-	return $log_paths[0];
-}
 
 # (static) Return an unique job ID that will identify a particular job with its
 # arguments
@@ -366,44 +303,6 @@ sub _gearman_job_id_from_handle($)
 	}
 
 	return $gearman_job_id;
-}
-
-# (static) Return worker log path for the function name and GJS job ID
-sub _worker_log_path($$$)
-{
-	my ($function_name, $gearman_job_id, $config) = @_;
-
-	my $log_path = _init_and_return_worker_log_dir($function_name, $config);
-	if ($function_name->unify_logs()) {
-		$log_path .= _sanitize_for_path($function_name) . '.log';
-	} else {
-		$log_path .= _sanitize_for_path($gearman_job_id) . '.log';
-	}
-	
-	return $log_path;
-}
-
-# (static) Initialize (create missing directories) and return a worker log directory path (with trailing slash)
-sub _init_and_return_worker_log_dir($$)
-{
-	my ($function_name, $config) = @_;
-
-	my $worker_log_dir = $config->worker_log_dir;
-	unless ($worker_log_dir) {
-		LOGDIE("Worker log directory is undefined.");
-	}
-
-	# Add a trailing slash
-    $worker_log_dir =~ s!/*$!/!;
-
-    # Append the function name
-    $worker_log_dir .= _sanitize_for_path($function_name) . '/';
-
-    unless ( -d $worker_log_dir ) {
-    	make_path( $worker_log_dir );
-    }
-
-    return $worker_log_dir;
 }
 
 # Serialize a hashref into string (to be passed to Gearman)
