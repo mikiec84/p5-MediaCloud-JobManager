@@ -38,7 +38,8 @@ WriteMakefile(
         'Test::Strict'          => 0,
         'Time::HiRes'           => 0,
     },
-    test => { TESTS => 't/*.t t/brokers/*.t', RECURSIVE_TEST_FILES => 1 },
+    EXE_FILES => [ qw(script/mjm_worker.pl) ],
+    test      => { TESTS => 't/*.t t/brokers/*.t', RECURSIVE_TEST_FILES => 1 },
     clean =>
       { FILES => 'MediaCloud-JobManager-* MANIFEST.bak MANIFEST.SKIP.bak Makefile Makefile.old MYMETA.* _build pm_to_blib' },
     META_MERGE => {
