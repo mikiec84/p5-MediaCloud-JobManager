@@ -1,5 +1,8 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.17.1 2016-04-27
+    * Copy mjm_worker.pl to bin/.
+
 0.17   2016-04-26
     * Rename from Gearman::JobScheduler to MediaCloud::JobManager.
     * Rename run_on_gearman() to run_remotely().
