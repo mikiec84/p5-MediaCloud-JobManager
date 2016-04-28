@@ -64,7 +64,7 @@ sub BUILD
     {
         unless ( ref $args->{ servers } eq ref [] )
         {
-            die "'servers' is not an arrayref";
+            LOGDIE( "'servers' is not an arrayref" );
         }
         $self->_servers( $args->{ servers } );
     }
@@ -105,7 +105,7 @@ sub start_worker($$)
             };
             if ( $@ )
             {
-                INFO( "Job '$job_handle' died: $@" );
+                ERROR( "Job '$job_handle' died: $@" );
                 $job->send_fail();
                 return undef;
             }
@@ -176,14 +176,14 @@ sub run_job_sync($$$$$)
     }
     else
     {
-        die "Unknown job priority: $priority";
+        LOGDIE( "Unknown job priority: $priority" );
     }
 
     # Do the job
     my ( $ret, $result ) = &{ $client_do_ref }( @client_args );
     unless ( $ret == GEARMAN_SUCCESS )
     {
-        die "Job broker failed: " . $client->error();
+        LOGDIE( "Job broker failed: " . $client->error() );
     }
 
     # Deserialize the results (because they were serialized and put into
@@ -241,17 +241,17 @@ sub run_job_async($$$$$)
     }
     else
     {
-        die "Unknown job priority: $priority";
+        LOGDIE( "Unknown job priority: $priority" );
     }
 
     # Do the job
     my ( $ret, $job_id ) = &{ $client_do_ref }( @client_args );
     unless ( $ret == GEARMAN_SUCCESS )
     {
-        die "Job broker failed: " . $client->error();
+        LOGDIE( "Job broker failed: " . $client->error() );
     }
 
-    say STDERR "Added job '$job_id' to queue";
+    INFO( "Added job '$job_id' to queue" );
 
     return $job_id;
 }
@@ -262,7 +262,7 @@ sub job_id_from_handle($$)
 
     unless ( defined $job->handle() )
     {
-        die "Unable to find a job ID to be used for logging";
+        LOGDIE( "Unable to find a job ID to be used for logging" );
     }
 
     return $job->handle();
@@ -317,7 +317,7 @@ sub show_jobs($)
         my $server_jobs = _show_jobs_on_server( $server );
         unless ( defined $server_jobs )
         {
-            say STDERR "Unable to fetch jobs from server $server.";
+            ERROR( "Unable to fetch jobs from server $server." );
             return undef;
         }
 
@@ -344,7 +344,7 @@ sub _show_jobs_on_server($)
         my @job = split( "\t", $line );
         unless ( scalar @job == 4 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
 
@@ -355,7 +355,7 @@ sub _show_jobs_on_server($)
 
         if ( defined $jobs->{ $job_id } )
         {
-            say STDERR "Job with job ID '$job_id' already exists in the jobs hashref, strange.";
+            ERROR( "Job with job ID '$job_id' already exists in the jobs hashref, strange." );
             return undef;
         }
 
@@ -378,7 +378,7 @@ sub cancel_job($)
         my $result = _cancel_job_on_server( $job_id, $server );
         unless ( $result )
         {
-            say STDERR "Unable to cancel job '$job_id' on server $server.";
+            ERROR( "Unable to cancel job '$job_id' on server $server." );
             return undef;
         }
     }
@@ -392,12 +392,12 @@ sub _cancel_job_on_server($$)
 
     unless ( $job_id )
     {
-        say STDERR "Job ID is empty.";
+        ERROR( "Job ID is empty." );
         return undef;
     }
     if ( $job_id =~ /\n/ or $job_id =~ /\r/ )
     {
-        say STDERR "Job ID can't contain line breaks";
+        ERROR( "Job ID can't contain line breaks." );
         return undef;
     }
 
@@ -409,7 +409,7 @@ sub _cancel_job_on_server($$)
 
     unless ( $job_cancelled eq 'OK' )
     {
-        say STDERR "Server $server didn't respond with 'OK': $job_cancelled";
+        ERROR( "Server $server didn't respond with 'OK': $job_cancelled" );
         return undef;
     }
 
@@ -427,7 +427,7 @@ sub server_status($$)
         my $status = _server_status_on_server( $server );
         unless ( defined $status )
         {
-            say STDERR "Unable to fetch status from server $server.";
+            ERROR( "Unable to fetch status from server $server." );
             return undef;
         }
 
@@ -454,7 +454,7 @@ sub _server_status_on_server($)
         my @function = split( "\t", $line );
         unless ( scalar @function == 4 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
 
@@ -465,7 +465,7 @@ sub _server_status_on_server($)
 
         if ( defined $functions->{ $function_name } )
         {
-            say STDERR "Function with name '$function_name' already exists in the functions hashref, strange.";
+            ERROR( "Function with name '$function_name' already exists in the functions hashref, strange." );
             return undef;
         }
 
@@ -490,7 +490,7 @@ sub workers($)
         my $server_workers = _workers_on_server( $server );
         unless ( defined $server_workers )
         {
-            say STDERR "Unable to fetch workers from server $server.";
+            ERROR( "Unable to fetch workers from server $server." );
             return undef;
         }
 
@@ -517,14 +517,14 @@ sub _workers_on_server($)
         my $colon_pos = index( $line, ':' );
         if ( $colon_pos == -1 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
 
         my @worker_description = split( /\s+/, substr( $line, 0, $colon_pos ) );
         unless ( scalar @worker_description == 3 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
         my @worker_functions = split( /\s+/, substr( $line, $colon_pos + 1 ) );
