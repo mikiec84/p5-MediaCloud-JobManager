@@ -21,10 +21,6 @@ use Gearman::XS::Task;
 use Gearman::XS::Worker;
 use JSON;
 
-# Hashref serializing / unserializing
-use Data::Compare;
-use Data::Dumper;
-
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init(
     {
@@ -656,22 +652,7 @@ sub _serialize_hashref($)
 
     # Gearman accepts only scalar arguments
     my $hashref_serialized = undef;
-    eval {
-
-        $hashref_serialized = $json->encode( $hashref );
-
-        # Try to deserialize, see if we get the same hashref
-        my $hashref_deserialized = $json->decode( $hashref_serialized );
-        unless ( Compare( $hashref, $hashref_deserialized ) )
-        {
-
-            my $error = "Serialized and deserialized hashrefs differ.\n";
-            $error .= "Original hashref: " . Dumper( $hashref );
-            $error .= "Deserialized hashref: " . Dumper( $hashref_deserialized );
-
-            LOGDIE( $error );
-        }
-    };
+    eval { $hashref_serialized = $json->encode( $hashref ); };
     if ( $@ )
     {
         LOGDIE( "Unable to serialize hashref with the JSON module: $@" );
