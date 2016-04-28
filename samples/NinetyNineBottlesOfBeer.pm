@@ -9,9 +9,10 @@ with 'MediaCloud::JobManager::Job';
 
 use Time::HiRes qw(usleep nanosleep);
 use Data::Dumper;
+use Readonly;
 
 # in microseconds
-use constant SLEEP_BETWEEN_BOTTLES => 100000;
+Readonly my $SLEEP_BETWEEN_BOTTLES => 100000;
 
 # Run job
 sub run($;$)
@@ -34,7 +35,7 @@ sub run($;$)
 
         $self->set_progress( ( $how_many_bottles - $_ + 1 ), $how_many_bottles );
 
-        usleep( SLEEP_BETWEEN_BOTTLES );
+        usleep( $SLEEP_BETWEEN_BOTTLES );
     }
     say STDERR "";
     say STDERR "*burp*";

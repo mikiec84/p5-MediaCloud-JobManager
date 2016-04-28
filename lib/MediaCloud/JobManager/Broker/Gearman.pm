@@ -20,6 +20,7 @@ use Gearman::XS::Client;
 use Gearman::XS::Task;
 use Gearman::XS::Worker;
 use JSON;
+use Readonly;
 
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init(
@@ -42,7 +43,7 @@ use MediaCloud::JobManager;
 use MediaCloud::JobManager::Job;
 
 # Gearman connection timeout
-use constant GEARMAND_ADMIN_TIMEOUT => 10;
+Readonly my $GEARMAND_ADMIN_TIMEOUT => 10;
 
 # JSON (de)serializer
 my $json = JSON->new->allow_nonref->canonical->utf8;
@@ -620,7 +621,7 @@ sub _net_telnet_instance_for_server($)
     my $telnet = new Net::Telnet(
         Host    => $host,
         Port    => $port,
-        Timeout => GEARMAND_ADMIN_TIMEOUT
+        Timeout => $GEARMAND_ADMIN_TIMEOUT
     );
     $telnet->open();
 

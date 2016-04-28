@@ -42,10 +42,9 @@ use Modern::Perl "2012";
 use MediaCloud::JobManager::Configuration;
 
 use Data::UUID;
-
 use Digest::SHA qw(sha256_hex);
-
 use Carp;
+use Readonly;
 
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init(
@@ -61,7 +60,7 @@ $| = 1;
 
 # Max. job ID length for MediaCloud::JobManager jobs (when
 # MediaCloud::JobManager::Job comes up with a job ID of its own)
-use constant MJM_JOB_ID_MAX_LENGTH => 256;
+Readonly my $MJM_JOB_ID_MAX_LENGTH => 256;
 
 =head2 (static) C<job_status($function_name, $job_id[, $config])>
 
@@ -196,9 +195,9 @@ sub _unique_path_job_id($$;$)
 
     # ID goes first in case the job name shortener decides to cut out a part of the job ID
     my $mjm_job_id = $unique_id . '.' . unique_job_id( $function_name, $job_args );
-    if ( length( $mjm_job_id ) > MJM_JOB_ID_MAX_LENGTH )
+    if ( length( $mjm_job_id ) > $MJM_JOB_ID_MAX_LENGTH )
     {
-        $mjm_job_id = substr( $mjm_job_id, 0, MJM_JOB_ID_MAX_LENGTH );
+        $mjm_job_id = substr( $mjm_job_id, 0, $MJM_JOB_ID_MAX_LENGTH );
     }
 
     # Sanitize for paths
