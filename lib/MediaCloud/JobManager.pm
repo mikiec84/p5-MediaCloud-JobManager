@@ -174,8 +174,10 @@ sub _unique_path_job_id($$;$)
         # Thus, the job has to be logged to a location that can later be found
         # by knowing the job ID.
 
+        my $config = $function_name->configuration();
+
         # Strip the host part (if present)
-        $unique_id = _job_id_from_handle( $job_id );
+        $unique_id = $config->{ broker }->job_id_from_handle( $job_id );
 
     }
     else
@@ -213,43 +215,6 @@ sub _sanitize_for_path($)
     $string =~ s/[^a-zA-Z0-9\.\-_\(\)=,]/_/gi;
 
     return $string;
-}
-
-# Return job ID from job handle
-#
-# Parameters:
-# * job handle, e.g.:
-#     * "H:tundra.home:18" (as reported by an instance of Gearman::Job), or
-#     * "127.0.0.1:4730//H:tundra.home:18" (as reported by gearmand)
-#
-# Returns: job ID (e.g. "H:localhost.localdomain:8")
-#
-# Dies on error.
-sub _job_id_from_handle($)
-{
-    my $job_handle = shift;
-
-    my $job_id;
-
-    # Strip the host part (if present)
-    if ( index( $job_handle, '//' ) != -1 )
-    {
-        # "127.0.0.1:4730//H:localhost.localdomain:8"
-        my ( $server, $job_id ) = split( '//', $job_handle );
-    }
-    else
-    {
-        # "H:localhost.localdomain:8"
-        $job_id = $job_handle;
-    }
-
-    # Validate
-    unless ( $job_id =~ /^H:.+?:\d+?$/ )
-    {
-        LOGDIE( "Invalid job ID: $job_id" );
-    }
-
-    return $job_id;
 }
 
 1;

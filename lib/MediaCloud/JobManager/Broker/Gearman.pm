@@ -266,7 +266,28 @@ sub job_id_from_handle($$)
         LOGDIE( "Unable to find a job ID to be used for logging" );
     }
 
-    return $job->handle();
+    my $job_handle = $job->handle();
+    my $job_id;
+
+    # Strip the host part (if present)
+    if ( index( $job_handle, '//' ) != -1 )
+    {
+        # "127.0.0.1:4730//H:localhost.localdomain:8"
+        my ( $server, $job_id ) = split( '//', $job_handle );
+    }
+    else
+    {
+        # "H:localhost.localdomain:8"
+        $job_id = $job_handle;
+    }
+
+    # Validate
+    unless ( $job_id =~ /^H:.+?:\d+?$/ )
+    {
+        LOGDIE( "Invalid job ID: $job_id" );
+    }
+
+    return $job_id;
 }
 
 sub set_job_progress($$$$)
