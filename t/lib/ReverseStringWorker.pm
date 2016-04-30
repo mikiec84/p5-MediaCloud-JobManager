@@ -38,6 +38,11 @@ sub run($;$)
     return $string;
 }
 
+sub configuration
+{
+    die "This placeholder shouldn't be called.";
+}
+
 no Moose;    # gets rid of scaffolding
 
 # Return package name instead of 1 or otherwise worker.pl won't know the name of the package it's loading
