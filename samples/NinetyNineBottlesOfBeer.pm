@@ -25,13 +25,13 @@ sub run($;$)
     # http://www.99-bottles-of-beer.net/language-perl-539.html
     foreach ( reverse( 1 .. $how_many_bottles ) )
     {
-        my $s        = ( $_ == 1 ) ? "" : "s";
-        my $oneLessS = ( $_ == 2 ) ? "" : "s";
+        my $s          = ( $_ == 1 ) ? "" : "s";
+        my $one_less_s = ( $_ == 2 ) ? "" : "s";
         say STDERR "";
         say STDERR "$_ bottle$s of beer on the wall,";
         say STDERR "$_ bottle$s of beer,";
         say STDERR "Take one down, pass it around,";
-        say STDERR $_ - 1, " bottle${oneLessS} of beer on the wall";
+        say STDERR $_ - 1, " bottle${one_less_s} of beer on the wall";
 
         $self->set_progress( ( $how_many_bottles - $_ + 1 ), $how_many_bottles );
 
