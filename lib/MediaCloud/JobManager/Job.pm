@@ -286,11 +286,6 @@ sub run_locally($;$$)
         LOGDIE( "Unable to determine unique MediaCloud::JobManager job ID" );
     }
 
-    my $starting_job_message = "Starting job ID \"$mjm_job_id\"...";
-    my $finished_job_message;
-
-    INFO( $starting_job_message );
-
     my $result;
     eval {
 
@@ -298,7 +293,7 @@ sub run_locally($;$$)
         $d->Indent( 0 );
         my $str_arguments = $d->Dump;
 
-        INFO( $starting_job_message );
+        INFO( "Starting job ID \"$mjm_job_id\"..." );
         INFO( "========" );
         INFO( "Arguments: $str_arguments" );
         INFO( "========" );
@@ -350,44 +345,24 @@ sub run_locally($;$$)
 
         unless ( $job_succeeded )
         {
-            my $job_failed_message = "Job \"$mjm_job_id\" failed" .
-              ( $class->retries() ? " after " . $class->retries() . " retries" : "" ) . ": $@";
-
             ERROR( "" );
             ERROR( "========" );
-            ERROR( $job_failed_message );
-            LOGDIE( $job_failed_message );
+            LOGDIE( "Job \"$mjm_job_id\" failed" .
+                  ( $class->retries() ? " after " . $class->retries() . " retries" : "" ) . ": $@" );
         }
 
         my $end = Time::HiRes::gettimeofday();
 
         INFO( "" );
         INFO( "========" );
-        $finished_job_message = "Finished job ID \"$mjm_job_id\" in " . sprintf( "%.2f", $end - $start ) . " seconds";
-        INFO( $finished_job_message );
+        INFO( "Finished job ID \"$mjm_job_id\" in " . sprintf( "%.2f", $end - $start ) . " seconds" );
 
     };
 
     my $error = $@;
-    if ( $error )
+    if ( $@ )
     {
-        # Write to job's log
-        ERROR( "Job died: $error" );
-    }
-
-    # Untie STDOUT / STDERR from Log4perl
-    untie *STDERR;
-    untie *STDOUT;
-
-    if ( $finished_job_message )
-    {
-        INFO( $finished_job_message );
-    }
-
-    if ( $error )
-    {
-        # Print out to worker's STDERR and die()
-        LOGDIE( "$error" );
+        LOGDIE( "Job died: $error" );
     }
 
     return $result;
