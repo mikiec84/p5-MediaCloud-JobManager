@@ -261,12 +261,20 @@ sub job_id_from_handle($$)
 {
     my ( $self, $job ) = @_;
 
-    unless ( defined $job->handle() )
+    my $job_handle;
+    if ( ref $job eq ref '' )
     {
-        LOGDIE( "Unable to find a job ID to be used for logging" );
+        $job_handle = $job;
+    }
+    else
+    {
+        unless ( defined $job->handle() )
+        {
+            LOGDIE( "Unable to find a job ID to be used for logging" );
+        }
+        $job_handle = $job->handle();
     }
 
-    my $job_handle = $job->handle();
     my $job_id;
 
     # Strip the host part (if present)
