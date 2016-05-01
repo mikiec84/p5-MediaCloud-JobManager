@@ -19,6 +19,7 @@ addons:
             - gearman-tools
             - libgearman-dev
             - libgearman7
+            - rabbitmq-server
 before_install:
     # Install test coverage reporting tool
     - travis_retry cpanm --notest Devel::Cover::Report::Coveralls
