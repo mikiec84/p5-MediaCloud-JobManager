@@ -65,6 +65,18 @@ AddTwoNumbers->add_to_queue( $args );
 
 # Development Notes
 
+## Installing
+
+OS X doesn't provide OpenSSL headers required by `Net::AMQP::RabbitMQ`, so before installing this module run:
+
+    # Install OpenSSL from Homebrew which provides required headers
+    brew install openssl
+
+    # Make Net::AMQP::RabbitMQ's Makefile look for OpenSSL headers in /usr/local/opt/openssl;
+    # also, remove MACOSX_DEPLOYMENT_TARGET from LD and use just "cc"
+    export PERL_MM_OPT='CCFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib" LD="env cc"'
+
+
 ## Code formatting
 
 Install `perltidy` Git hook to automatically fix script formatting:
