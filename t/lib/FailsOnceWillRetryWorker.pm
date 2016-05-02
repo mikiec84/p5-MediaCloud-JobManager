@@ -44,7 +44,7 @@ sub run($;$)
 
 sub retries()
 {
-    return 3;
+    die "This placeholder shouldn't be called.";
 }
 
 sub configuration

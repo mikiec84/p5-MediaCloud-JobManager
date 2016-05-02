@@ -8,6 +8,11 @@ use lib qw|lib/ t/lib/ t/lib/Gearman/ t/brokers/|;
 use Moose;
 with 'Gearman::TestWorker', 'FailsOnceWillRetryWorker' => { -excludes => [ 'configuration', 'retries' ], };
 
+sub retries()
+{
+    return 3;
+}
+
 no Moose;
 
 __PACKAGE__;
