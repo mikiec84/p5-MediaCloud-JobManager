@@ -55,9 +55,9 @@ Readonly my $RABBITMQ_QUEUE_DURABLE   => 1;
 
 # RabbitMQ priorities
 Readonly my %RABBITMQ_PRIORITIES => (
-    MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW()    => 0,
-    MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL() => 1,
-    MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH()   => 2,
+    $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW    => 0,
+    $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL => 1,
+    $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH   => 2,
 );
 
 # JSON (de)serializer

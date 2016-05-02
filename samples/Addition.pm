@@ -27,7 +27,7 @@ sub run($;$)
 
 sub priority()
 {
-    return MJM_JOB_PRIORITY_LOW();
+    return $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW;
 }
 
 no Moose;    # gets rid of scaffolding

@@ -161,28 +161,33 @@ Returns one of the three constants:
 
 =over 4
 
-=item * C<MJM_JOB_PRIORITY_LOW()>, if the job is considered of "low priority".
+=item * C<$MJM_JOB_PRIORITY_LOW>, if the job is considered of "low priority".
 
-=item * C<MJM_JOB_PRIORITY_NORMAL()> if the job is considered of "normal priority".
+=item * C<$MJM_JOB_PRIORITY_NORMAL> if the job is considered of "normal priority".
 
-=item * C<MJM_JOB_PRIORITY_HIGH()> if the job is considered of "high priority".
+=item * C<$MJM_JOB_PRIORITY_HIGH> if the job is considered of "high priority".
 
 =back
 
-Default implementation of this subroutine returns C<MJM_JOB_PRIORITY_NORMAL()>
+Default implementation of this subroutine returns C<$MJM_JOB_PRIORITY_NORMAL>
 ("normal priority" job).
 
 =cut
 
-# Job priorities (subroutines instead of constants because exporting
-# constants with Moose in place is painful)
-sub MJM_JOB_PRIORITY_LOW    { 'low' }
-sub MJM_JOB_PRIORITY_NORMAL { 'normal' }
-sub MJM_JOB_PRIORITY_HIGH   { 'high' }
+# Job priorities
+Readonly our $MJM_JOB_PRIORITY_LOW    => 'low';
+Readonly our $MJM_JOB_PRIORITY_NORMAL => 'normal';
+Readonly our $MJM_JOB_PRIORITY_HIGH   => 'high';
+
+# Job priorities (subroutines for backwards compatibility)
+sub MJM_JOB_PRIORITY_LOW    { return $MJM_JOB_PRIORITY_LOW }
+sub MJM_JOB_PRIORITY_NORMAL { return $MJM_JOB_PRIORITY_NORMAL }
+sub MJM_JOB_PRIORITY_HIGH   { return $MJM_JOB_PRIORITY_HIGH }
 
 sub priority()
 {
-    return MJM_JOB_PRIORITY_NORMAL();
+    # Default priority
+    return $MJM_JOB_PRIORITY_NORMAL;
 }
 
 =head1 HELPER SUBROUTINES

@@ -163,15 +163,15 @@ sub run_job_sync($$$$$)
 
     # Choose the client subroutine to use (based on the priority)
     my $client_do_ref = undef;
-    if ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW() )
+    if ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW )
     {
         $client_do_ref = sub { $client->do_low( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL )
     {
         $client_do_ref = sub { $client->do( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH )
     {
         $client_do_ref = sub { $client->do_high( @_ ) };
     }
@@ -228,15 +228,15 @@ sub run_job_async($$$$$)
 
     # Choose the client subroutine to use (based on the priority)
     my $client_do_ref = undef;
-    if ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW() )
+    if ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW )
     {
         $client_do_ref = sub { $client->do_low_background( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL )
     {
         $client_do_ref = sub { $client->do_background( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH )
     {
         $client_do_ref = sub { $client->do_high_background( @_ ) };
     }
