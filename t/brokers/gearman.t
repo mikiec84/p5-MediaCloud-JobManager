@@ -8,6 +8,12 @@ require 'broker-tests.inc.pl';
 
 use IO::Socket::INET;
 
+# Test workers
+use Gearman::ReverseStringWorker;
+use Gearman::FailsAlwaysWorker;
+use Gearman::FailsOnceWorker;
+use Gearman::FailsOnceWillRetryWorker;
+
 sub _gearmand_is_installed()
 {
     return ( system( 'gearmand --version' ) == 0 );

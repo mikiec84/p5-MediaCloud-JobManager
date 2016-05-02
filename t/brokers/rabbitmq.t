@@ -6,7 +6,11 @@ use lib qw|lib/ t/lib/ t/brokers/|;
 
 require 'broker-tests.inc.pl';
 
-use IO::Socket::INET;
+# Test workers
+use RabbitMQ::ReverseStringWorker;
+use RabbitMQ::FailsAlwaysWorker;
+use RabbitMQ::FailsOnceWorker;
+use RabbitMQ::FailsOnceWillRetryWorker;
 
 sub _rabbitmq_is_installed_and_started()
 {
