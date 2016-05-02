@@ -14,11 +14,6 @@ use Gearman::FailsAlwaysWorker;
 use Gearman::FailsOnceWorker;
 use Gearman::FailsOnceWillRetryWorker;
 
-sub _gearmand_is_installed()
-{
-    return ( system( 'gearmand --version' ) == 0 );
-}
-
 sub _gearmand_is_started()
 {
     my $socket = IO::Socket::INET->new(
@@ -40,9 +35,9 @@ sub _gearmand_is_started()
 
 sub main()
 {
-    unless ( _gearmand_is_installed() and _gearmand_is_started() )
+    unless ( _gearmand_is_started() )
     {
-        plan skip_all => "'gearmand' is not installed or not started";
+        plan skip_all => "'gearmand' is not started";
     }
     else
     {
