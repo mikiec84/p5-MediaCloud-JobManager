@@ -42,11 +42,6 @@ Parameters:
 
 =item * Hashref with arguments or undef
 
-=item * Job priority (MJM_JOB_PRIORITY_LOW(), MJM_JOB_PRIORITY_NORMAL(), or MJM_JOB_PRIORITY_HIGH())
-
-=item * Whether or not the job is "unique" (should be skipped if a job with
-identical arguments is already in the queue)
-
 =back
 
 Returns job result (whatever the job subroutine returned).
@@ -66,11 +61,6 @@ Parameters:
 =item * Function name (e.g. "NinetyNineBottlesOfBeer")
 
 =item * Hashref with arguments or undef
-
-=item * Job priority (MJM_JOB_PRIORITY_LOW(), MJM_JOB_PRIORITY_NORMAL(), or MJM_JOB_PRIORITY_HIGH())
-
-=item * Whether or not the job is "unique" (should be skipped if a job with
-identical arguments is already in the queue)
 
 =back
 
