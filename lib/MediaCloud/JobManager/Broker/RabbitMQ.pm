@@ -388,6 +388,9 @@ sub run_job_sync($$$$$)
         LOGDIE( "Unable to declare results queue '$reply_to_queue': $@" );
     }
 
+    my $consume_options = {};
+    my $consumer_tag = $self->_mq->consume( $channel_number, $reply_to_queue, $consume_options );
+
     # Wait for the job to finish
     my $recv_timeout = 0;                       # block until message is received
     my $message      = $self->_mq->recv( 0 );
