@@ -392,6 +392,7 @@ sub run_job_sync($$$$$)
     my $consumer_tag = $self->_mq->consume( $channel_number, $reply_to_queue, $consume_options );
 
     # Wait for the job to finish
+    # FIXME skip (requeue) messages that don't belong to us
     my $recv_timeout = 0;                       # block until message is received
     my $message      = $self->_mq->recv( 0 );
 
