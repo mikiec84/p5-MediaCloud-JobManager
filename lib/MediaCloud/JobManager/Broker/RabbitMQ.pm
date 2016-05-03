@@ -9,7 +9,6 @@ package MediaCloud::JobManager::Broker::RabbitMQ;
 #
 # FIXME create reply_to queue when task is added
 # FIXME unique tasks (http://engineroom.trackmaven.com/blog/announcing-celery-once/)
-# FIXME does it reconnect on every add_to_queue()?
 # FIXME create an queue per-client, not per-job
 # FIXME try deleting queue with responses when client exits
 # FIXME remove unique(), consider adding do_not_expect_result()
@@ -67,8 +66,12 @@ my $json = JSON->new->allow_nonref->canonical->utf8;
 # (channels shouldn't be shared between threads, so we use PID as default channel number)
 has '_channel_number' => ( is => 'rw', isa => 'Int', default => $$ );
 
-# Net::AMQP::RabbitMQ instance
-has '_mq' => ( is => 'rw', isa => 'Net::AMQP::RabbitMQ' );
+# Per-package Net::AMQP::RabbitMQ instance (so that we won't be reconnecting on every new())
+my $_mq;
+
+# Connection identifier (reconnect when the identifier changes)
+my $_mq_connection_identifier;
+
 
 # Constructor
 sub BUILD
@@ -84,44 +87,63 @@ sub BUILD
     my $vhost         = $args->{ vhost } // $default_vhost;
     my $timeout       = $args->{ timeout } // $RABBITMQ_DEFAULT_TIMEOUT;
 
-    # Connect to RabbitMQ, open channel
-    DEBUG( "Connecting to RabbitMQ (hostname: $hostname, port: $port, username: $username)..." );
-    my $mq = Net::AMQP::RabbitMQ->new();
-    eval {
-        $mq->connect(
-            $hostname,
-            {
-                user     => $username,
-                password => $password,
-                port     => $port,
-                vhost    => $vhost,
-                timeout  => $timeout,
-            }
-        );
-    };
-    if ( $@ )
+    my $conn_id = _connection_identifier( $hostname, $port, $username, $password, $vhost, $timeout );
+    unless ( defined( $_mq_connection_identifier ) and $_mq_connection_identifier eq $conn_id )
     {
-        LOGDIE( "Unable to connect to RabbitMQ: $@" );
+
+        # Connect to RabbitMQ, open channel
+        DEBUG( "Connecting to RabbitMQ (hostname: $hostname, port: $port, username: $username)..." );
+        my $mq = Net::AMQP::RabbitMQ->new();
+        eval {
+            $mq->connect(
+                $hostname,
+                {
+                    user     => $username,
+                    password => $password,
+                    port     => $port,
+                    vhost    => $vhost,
+                    timeout  => $timeout,
+                }
+            );
+        };
+        if ( $@ )
+        {
+            LOGDIE( "Unable to connect to RabbitMQ: $@" );
+        }
+
+        my $channel_number = $self->_channel_number;
+        unless ( $channel_number )
+        {
+            LOGDIE( "Channel number is unset." );
+        }
+
+        eval {
+            $mq->channel_open( $channel_number );
+
+            # Fetch one message at a time
+            $mq->basic_qos( $channel_number, { prefetch_count => 1 } );
+        };
+        if ( $@ )
+        {
+            LOGDIE( "Unable to open channel $channel_number: $@" );
+        }
+
+        $_mq                       = $mq;
+        $_mq_connection_identifier = $conn_id;
     }
+}
 
-    my $channel_number = $self->_channel_number;
-    unless ( $channel_number )
-    {
-        LOGDIE( "Channel number is unset." );
-    }
+# Used to uniquely identify RabbitMQ connections (by connection credentials and
+# PID) so that we know when to reconnect
+sub _connection_identifier($$$$$$)
+{
+    my ( $hostname, $port, $username, $password, $vhost, $timeout ) = @_;
 
-    eval {
-        $mq->channel_open( $channel_number );
+    # Reconnect when running on a fork too
+    my $pid = $$;
 
-        # Fetch one message at a time
-        $mq->basic_qos( $channel_number, { prefetch_count => 1 } );
-    };
-    if ( $@ )
-    {
-        LOGDIE( "Unable to open channel $channel_number: $@" );
-    }
-
-    $self->_mq( $mq );
+    return sprintf( 'PID=%d; hostname=%s; port=%d; username: %s; password=%s; vhost=%s, timeout=%d',
+        $pid, $hostname, $port, $username, $password, $vhost, $timeout );
 }
 
 sub _declare_queue($$$$)
@@ -135,7 +157,7 @@ sub _declare_queue($$$$)
     };
     my $arguments = { 'x-max-priority' => _priority_count(), };
 
-    eval { $self->_mq->queue_declare( $channel_number, $queue_name, $options, $arguments ); };
+    eval { $_mq->queue_declare( $channel_number, $queue_name, $options, $arguments ); };
     if ( $@ )
     {
         LOGDIE( "Unable to declare queue '$queue_name': $@" );
@@ -147,7 +169,7 @@ sub _declare_queue($$$$)
         my $routing_key   = $queue_name;
 
         eval {
-            $self->_mq->exchange_declare(
+            $_mq->exchange_declare(
                 $channel_number,
                 $exchange_name,
                 {
@@ -155,7 +177,7 @@ sub _declare_queue($$$$)
                     auto_delete => 0,
                 }
             );
-            $self->_mq->queue_bind( $channel_number, $queue_name, $exchange_name, $routing_key );
+            $_mq->queue_bind( $channel_number, $queue_name, $exchange_name, $routing_key );
         };
         if ( $@ )
         {
@@ -211,7 +233,7 @@ sub _publish_json_message($$$;$$)
         $props = { %{ $props }, %{ $extra_props } };
     }
 
-    eval { $self->_mq->publish( $channel_number, $routing_key, $payload_json, $options, $props ); };
+    eval { $_mq->publish( $channel_number, $routing_key, $payload_json, $options, $props ); };
     if ( $@ )
     {
         LOGDIE( "Unable to publish message to routing key '$routing_key': $@" );
@@ -341,7 +363,7 @@ sub _process_worker_message($$$)
     }
 
     # ACK the message (mark the job as completed)
-    eval { $self->_mq->ack( $self->_channel_number, $delivery_tag ); };
+    eval { $_mq->ack( $self->_channel_number, $delivery_tag ); };
     if ( $@ )
     {
         LOGDIE( "Unable to mark job $celery_job_id as completed: $@" );
@@ -359,12 +381,12 @@ sub start_worker($$)
         # Don't assume that the job is finished when it reaches the worker
         no_ack => 0,
     };
-    my $consumer_tag = $self->_mq->consume( $self->_channel_number, $function_name, $consume_options );
+    my $consumer_tag = $_mq->consume( $self->_channel_number, $function_name, $consume_options );
 
     INFO( "Consumer tag: $consumer_tag" );
     INFO( "Worker is ready and accepting jobs" );
     my $recv_timeout = 0;    # block until message is received
-    while ( my $message = $self->_mq->recv( 0 ) )
+    while ( my $message = $_mq->recv( 0 ) )
     {
         $self->_process_worker_message( $function_name, $message );
     }
@@ -389,12 +411,12 @@ sub run_job_sync($$$$$)
     }
 
     my $consume_options = {};
-    my $consumer_tag = $self->_mq->consume( $channel_number, $reply_to_queue, $consume_options );
+    my $consumer_tag = $_mq->consume( $channel_number, $reply_to_queue, $consume_options );
 
     # Wait for the job to finish
     # FIXME skip (requeue) messages that don't belong to us
-    my $recv_timeout = 0;                       # block until message is received
-    my $message      = $self->_mq->recv( 0 );
+    my $recv_timeout = 0;                 # block until message is received
+    my $message      = $_mq->recv( 0 );
 
     my $correlation_id = $message->{ props }->{ correlation_id };
     unless ( $correlation_id )
