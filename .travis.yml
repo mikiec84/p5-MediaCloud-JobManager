@@ -1,9 +1,10 @@
 language: perl
-# Use container-based infrastucture on Travis which doesn't support running
-# things as root; see http://docs.travis-ci.com/user/migrating-from-legacy/
-sudo: false
+# RabbitMQ requires to setuid
+sudo: true
 perl:
     - "5.22"
+services:
+    - rabbitmq
 addons:
     hosts:
         - jobscheduler.local
@@ -19,7 +20,10 @@ addons:
             - gearman-tools
             - libgearman-dev
             - libgearman7
+            - rabbitmq-server
 before_install:
+    # Start RabbitMQ
+    - sudo service rabbitmq-server start
     # Install test coverage reporting tool
     - travis_retry cpanm --notest Devel::Cover::Report::Coveralls
 install:

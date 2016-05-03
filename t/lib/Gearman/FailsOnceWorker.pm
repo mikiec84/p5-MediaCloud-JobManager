@@ -6,7 +6,7 @@ use warnings;
 use lib qw|lib/ t/lib/ t/lib/Gearman/ t/brokers/|;
 
 use Moose;
-with 'FailsOnceWorker', 'Gearman::TestWorker' => { -excludes => [ 'configuration' ], };
+with 'Gearman::TestWorker', 'FailsOnceWorker' => { -excludes => [ 'configuration' ], };
 
 no Moose;
 

@@ -27,7 +27,14 @@ sub run($;$)
 
 sub priority()
 {
-    return MJM_JOB_PRIORITY_LOW();
+    return $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW;
+}
+
+sub configuration()
+{
+    my $configuration = MediaCloud::JobManager::Configuration->new();
+    $configuration->broker( MediaCloud::JobManager::Broker::RabbitMQ->new() );
+    return $configuration;
 }
 
 no Moose;    # gets rid of scaffolding

@@ -9,16 +9,16 @@ require 'broker-tests.inc.pl';
 use IO::Socket::INET;
 
 # Test workers
-use Gearman::ReverseStringWorker;
-use Gearman::FailsAlwaysWorker;
-use Gearman::FailsOnceWorker;
-use Gearman::FailsOnceWillRetryWorker;
+use RabbitMQ::ReverseStringWorker;
+use RabbitMQ::FailsAlwaysWorker;
+use RabbitMQ::FailsOnceWorker;
+use RabbitMQ::FailsOnceWillRetryWorker;
 
-sub _gearmand_is_started()
+sub _rabbitmq_is_started()
 {
     my $socket = IO::Socket::INET->new(
         PeerAddr => 'localhost',
-        PeerPort => 4730,
+        PeerPort => 5672,
         Proto    => 'tcp',
         Type     => SOCK_STREAM
     );
@@ -35,15 +35,15 @@ sub _gearmand_is_started()
 
 sub main()
 {
-    unless ( _gearmand_is_started() )
+    unless ( _rabbitmq_is_started() )
     {
-        plan skip_all => "'gearmand' is not started";
+        plan skip_all => "'rabbitmq-server' is not started";
     }
     else
     {
         plan tests => 18;
 
-        run_tests( 'Gearman' );
+        run_tests( 'RabbitMQ' );
 
         Test::NoWarnings::had_no_warnings();
     }

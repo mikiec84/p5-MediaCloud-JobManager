@@ -10,8 +10,10 @@ use Modern::Perl "2012";
 
 use Moose 2.1005;
 use MooseX::Singleton;    # ->instance becomes available
+use MediaCloud::JobManager::Job;
 use MediaCloud::JobManager::Broker;
 use MediaCloud::JobManager::Broker::Gearman;
+use MediaCloud::JobManager::Broker::RabbitMQ;
 
 # Instance of specific job broker
 has 'broker' => (
@@ -20,6 +22,6 @@ has 'broker' => (
     default => sub { return MediaCloud::JobManager::Broker::Gearman->new(); },
 );
 
-no Moose;                 # gets rid of scaffolding
+no Moose;    # gets rid of scaffolding
 
 1;
