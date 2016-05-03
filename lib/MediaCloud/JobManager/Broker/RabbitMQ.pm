@@ -8,7 +8,6 @@ package MediaCloud::JobManager::Broker::RabbitMQ;
 # MediaCloud::JobManager::Broker::RabbitMQ->new();
 #
 # FIXME unique tasks (http://engineroom.trackmaven.com/blog/announcing-celery-once/)
-# FIXME create an queue per-client, not per-job
 # FIXME try deleting queue with responses when client exits
 # FIXME remove unique(), consider adding do_not_expect_result()
 
@@ -70,7 +69,16 @@ has '_vhost'    => ( is => 'rw', isa => 'Str' );
 has '_timeout'  => ( is => 'rw', isa => 'Int' );
 
 # RabbitMQ connection pool for every connection ID (PID + credentials)
-my %_rabbitmq_connection_for_id;
+my %_rabbitmq_connection_for_connection_id;
+
+# "reply_to" queues for connection ID + function name
+#
+# We emulate Celery's RPC via RabbitMQ behavior in which results are being
+# stuffed in per-client result queues and can be retrieved only by the same
+# client that requested the job using run_remotely() or add_to_queue():
+#
+# http://docs.celeryproject.org/en/latest/userguide/tasks.html#rpc-result-backend-rabbitmq-qpid
+my %_reply_to_queues_for_connection_id_function_name;
 
 # Constructor
 sub BUILD
@@ -110,7 +118,7 @@ sub _mq($)
 
     my $conn_id = $self->_connection_identifier();
 
-    unless ( $_rabbitmq_connection_for_id{ $conn_id } )
+    unless ( $_rabbitmq_connection_for_connection_id{ $conn_id } )
     {
 
         # Connect to RabbitMQ, open channel
@@ -151,10 +159,34 @@ sub _mq($)
             LOGDIE( "Unable to open channel $channel_number: $@" );
         }
 
-        $_rabbitmq_connection_for_id{ $conn_id } = $mq;
+        $_rabbitmq_connection_for_connection_id{ $conn_id }           = $mq;
+        $_reply_to_queues_for_connection_id_function_name{ $conn_id } = ();
     }
 
-    return $_rabbitmq_connection_for_id{ $conn_id };
+    return $_rabbitmq_connection_for_connection_id{ $conn_id };
+}
+
+# Returns "reply_to" queue name for current connection and provided function name
+sub _reply_to_queue($$)
+{
+    my ( $self, $function_name ) = @_;
+
+    my $conn_id = $self->_connection_identifier();
+
+    unless ( defined $_reply_to_queues_for_connection_id_function_name{ $conn_id } )
+    {
+        # Should have been defined in _mq()
+        WARN( "'reply_to' queue for connection ID '$conn_id' is not a hash." );
+        $_reply_to_queues_for_connection_id_function_name{ $conn_id } = ();
+    }
+
+    unless ( $_reply_to_queues_for_connection_id_function_name{ $conn_id }{ $function_name } )
+    {
+        my $reply_to_queue = _random_uuid();
+        $_reply_to_queues_for_connection_id_function_name{ $conn_id }{ $function_name } = $reply_to_queue;
+    }
+
+    return $_reply_to_queues_for_connection_id_function_name{ $conn_id }{ $function_name };
 }
 
 # Channel number we should be talking to
@@ -427,19 +459,17 @@ sub run_job_sync($$$$$)
     # Post the job
     my $celery_job_id = $self->run_job_async( $function_name, $args, $priority, $unique );
 
-    # Will reply to queue "celery_job_id"; see comment in run_job_async()
-    my $reply_to_queue = $celery_job_id;
-
     # Declare result queue
-    my $channel_number = _channel_number();
+    my $reply_to_queue = $self->_reply_to_queue( $function_name );
     eval { $self->_declare_results_queue( $reply_to_queue ); };
     if ( $@ )
     {
         LOGDIE( "Unable to declare results queue '$reply_to_queue': $@" );
     }
 
+    my $channel_number  = _channel_number();
     my $consume_options = {};
-    my $consumer_tag = $mq->consume( $channel_number, $reply_to_queue, $consume_options );
+    my $consumer_tag    = $mq->consume( $channel_number, $reply_to_queue, $consume_options );
 
     # Wait for the job to finish
     # FIXME skip (requeue) messages that don't belong to us
@@ -529,16 +559,8 @@ sub run_job_async($$$$$)
     # Declare task queue
     $self->_declare_task_queue( $function_name );
 
-    # Python's Celery creates a separate "reply_to" queue for storing job
-    # result (which has Celery job ID as "correlation_id").
-    #
-    # I have no idea how Celery later finds out the "reply_to" queue's name
-    # from only having the job ID ("correlation_id") so in Perl implementation
-    # we use the same very UUID for the Celery job ID and "reply_to" queue
-    # name.
-    my $reply_to_queue = $celery_job_id;
-
     # Declare result queue before posting a job (just like Celery does)
+    my $reply_to_queue = $self->_reply_to_queue( $function_name );
     $self->_declare_results_queue( $reply_to_queue );
 
     # Post a job
