@@ -37,6 +37,7 @@ WriteMakefile(
         'Test::More'            => 0,
         'Test::NoWarnings'      => 0,
         'Test::Strict'          => 0,
+        'Tie::Cache'            => 0,
         'Time::HiRes'           => 0,
         'UUID::Tiny'            => '1.04',
     },
