@@ -7,7 +7,6 @@ package MediaCloud::JobManager::Broker::RabbitMQ;
 #
 # MediaCloud::JobManager::Broker::RabbitMQ->new();
 #
-# FIXME create reply_to queue when task is added
 # FIXME unique tasks (http://engineroom.trackmaven.com/blog/announcing-celery-once/)
 # FIXME create an queue per-client, not per-job
 # FIXME try deleting queue with responses when client exits
