@@ -17,11 +17,24 @@ use Data::Dumper;
 
 sub main()
 {
+    my @job_ids;
+
     for ( my $x = 1 ; $x < 100 ; ++$x )
     {
         my $job_id = Addition->add_to_queue( { a => 3, b => 5 } );
         say STDERR "Job ID: $job_id";
+        push( @job_ids, $job_id );
     }
+
+    say STDERR "Waiting for jobs to complete...";
+    sleep( 3 );
+
+    for ( my $x = 1 ; $x < 10 ; ++$x )
+    {
+        my $result = Addition->run_remotely( { a => 3, b => 5 } );
+        say STDERR "Job result: " . $result;
+    }
+
 }
 
 main();
