@@ -58,6 +58,13 @@ sub unique()
     return 1;
 }
 
+sub configuration()
+{
+    my $configuration = MediaCloud::JobManager::Configuration->new();
+    $configuration->broker( MediaCloud::JobManager::Broker::RabbitMQ->new() );
+    return $configuration;
+}
+
 no Moose;    # gets rid of scaffolding
 
 # Return package name instead of 1 or otherwise worker.pl won't know the name of the package it's loading
