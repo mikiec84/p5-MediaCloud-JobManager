@@ -163,11 +163,6 @@ sub _mq($)
         {
             LOGDIE( "Channel number is unset." );
         }
-        my $max_channel_number = $mq->get_channel_max();
-        if ( $channel_number > $max_channel_number )
-        {
-            LOGDIE( "Channel number (PID) $channel_number is bigger than max. channel number $max_channel_number" );
-        }
 
         eval {
             $mq->channel_open( $channel_number );
