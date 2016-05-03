@@ -143,13 +143,13 @@ Returns array with job status:
 {     # Job ID that was passed as a parameter     'job_id' =>
 'H:tundra.home:8',
 
-	# Whether or not the job is currently running
-	'running' => 1,
+    # Whether or not the job is currently running
+    'running' => 1,
 
-	# Numerator and denominator of the job's progress
-	# (in this example, job is 1333/2000 complete)
-	'numerator' => 1333,
-	'denominator' => 2000
+    # Numerator and denominator of the job's progress
+    # (in this example, job is 1333/2000 complete)
+    'numerator' => 1333,
+    'denominator' => 2000
 };
 
 =end text
@@ -168,28 +168,28 @@ Returns a hashref of servers and their jobs, e.g.:
 
 =begin text
 
-	{
-		'localhost:4730' => {
-			# Job ID
-			'H:tundra.home:8' => {
+    {
+        'localhost:4730' => {
+            # Job ID
+            'H:tundra.home:8' => {
 
-				# Whether or not the job is currently running
-				'running' => 1,
+                # Whether or not the job is currently running
+                'running' => 1,
 
-				# Numerator and denominator of the job's progress
-				# (in this example, job is 1333/2000 complete)
-				'numerator' => 1333,	# 0 if the job haven't been started yet
-				'denominator' => 2000	# 1 if the job haven't been started yet;
-										# 0 if the job has been cancelled
-				
-			},
+                # Numerator and denominator of the job's progress
+                # (in this example, job is 1333/2000 complete)
+                'numerator' => 1333,    # 0 if the job haven't been started yet
+                'denominator' => 2000   # 1 if the job haven't been started yet;
+                                        # 0 if the job has been cancelled
+                
+            },
 
-			# ...
+            # ...
 
-		},
+        },
 
-		# ...
-	}
+        # ...
+    }
 
 =end text
 
@@ -225,28 +225,28 @@ Returns a hashref of servers and their statuses, e.g.:
 
 =begin text
 
-	{
-		'localhost:4730' => {
-			# Function name
-			'NinetyNineBottlesOfBeer' => {
+    {
+        'localhost:4730' => {
+            # Function name
+            'NinetyNineBottlesOfBeer' => {
 
-				# Number of queued (waiting to be run) jobs
-				'total'	=> 4,
+                # Number of queued (waiting to be run) jobs
+                'total' => 4,
 
-				# Number of currently running jobs
-				'running' => 1,
+                # Number of currently running jobs
+                'running' => 1,
 
-				# Number of currently registered workers
-				'available_workers' => 1
-				
-			},
+                # Number of currently registered workers
+                'available_workers' => 1
+                
+            },
 
-			# ...
-		},
+            # ...
+        },
 
-		# ...
+        # ...
 
-	};
+    };
 
 =end text
 
@@ -264,8 +264,8 @@ Returns a hashref of servers and their workers, e.g.:
 
 =begin text
 
-	{
-		'localhost:4730' => [
+    {
+        'localhost:4730' => [
             {
                 # Unique integer file descriptor of the worker
                 'file_descriptor' => 23,
@@ -285,9 +285,9 @@ Returns a hashref of servers and their workers, e.g.:
             # ...
         ],
 
-		# ...
+        # ...
 
-	};
+    };
 
 =end text
 
