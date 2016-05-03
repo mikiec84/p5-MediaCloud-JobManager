@@ -20,10 +20,7 @@ use Gearman::XS::Client;
 use Gearman::XS::Task;
 use Gearman::XS::Worker;
 use JSON;
-
-# Hashref serializing / unserializing
-use Data::Compare;
-use Data::Dumper;
+use Readonly;
 
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init(
@@ -46,7 +43,7 @@ use MediaCloud::JobManager;
 use MediaCloud::JobManager::Job;
 
 # Gearman connection timeout
-use constant GEARMAND_ADMIN_TIMEOUT => 10;
+Readonly my $GEARMAND_ADMIN_TIMEOUT => 10;
 
 # JSON (de)serializer
 my $json = JSON->new->allow_nonref->canonical->utf8;
@@ -68,7 +65,7 @@ sub BUILD
     {
         unless ( ref $args->{ servers } eq ref [] )
         {
-            die "'servers' is not an arrayref";
+            LOGDIE( "'servers' is not an arrayref" );
         }
         $self->_servers( $args->{ servers } );
     }
@@ -109,7 +106,7 @@ sub start_worker($$)
             };
             if ( $@ )
             {
-                INFO( "Job '$job_handle' died: $@" );
+                ERROR( "Job '$job_handle' died: $@" );
                 $job->send_fail();
                 return undef;
             }
@@ -166,28 +163,28 @@ sub run_job_sync($$$$$)
 
     # Choose the client subroutine to use (based on the priority)
     my $client_do_ref = undef;
-    if ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW() )
+    if ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW )
     {
         $client_do_ref = sub { $client->do_low( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL )
     {
         $client_do_ref = sub { $client->do( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH )
     {
         $client_do_ref = sub { $client->do_high( @_ ) };
     }
     else
     {
-        die "Unknown job priority: $priority";
+        LOGDIE( "Unknown job priority: $priority" );
     }
 
     # Do the job
     my ( $ret, $result ) = &{ $client_do_ref }( @client_args );
     unless ( $ret == GEARMAN_SUCCESS )
     {
-        die "Job broker failed: " . $client->error();
+        LOGDIE( "Job broker failed: " . $client->error() );
     }
 
     # Deserialize the results (because they were serialized and put into
@@ -231,31 +228,31 @@ sub run_job_async($$$$$)
 
     # Choose the client subroutine to use (based on the priority)
     my $client_do_ref = undef;
-    if ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW() )
+    if ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW )
     {
         $client_do_ref = sub { $client->do_low_background( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_NORMAL )
     {
         $client_do_ref = sub { $client->do_background( @_ ) };
     }
-    elsif ( $priority eq MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH() )
+    elsif ( $priority eq $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_HIGH )
     {
         $client_do_ref = sub { $client->do_high_background( @_ ) };
     }
     else
     {
-        die "Unknown job priority: $priority";
+        LOGDIE( "Unknown job priority: $priority" );
     }
 
     # Do the job
     my ( $ret, $job_id ) = &{ $client_do_ref }( @client_args );
     unless ( $ret == GEARMAN_SUCCESS )
     {
-        die "Job broker failed: " . $client->error();
+        LOGDIE( "Job broker failed: " . $client->error() );
     }
 
-    say STDERR "Added job '$job_id' to queue";
+    INFO( "Added job '$job_id' to queue" );
 
     return $job_id;
 }
@@ -264,12 +261,41 @@ sub job_id_from_handle($$)
 {
     my ( $self, $job ) = @_;
 
-    unless ( defined $job->handle() )
+    my $job_handle;
+    if ( ref $job eq ref '' )
     {
-        die "Unable to find a job ID to be used for logging";
+        $job_handle = $job;
+    }
+    else
+    {
+        unless ( defined $job->handle() )
+        {
+            LOGDIE( "Unable to find a job ID to be used for logging" );
+        }
+        $job_handle = $job->handle();
     }
 
-    return $job->handle();
+    my $job_id;
+
+    # Strip the host part (if present)
+    if ( index( $job_handle, '//' ) != -1 )
+    {
+        # "127.0.0.1:4730//H:localhost.localdomain:8"
+        my ( $server, $job_id ) = split( '//', $job_handle );
+    }
+    else
+    {
+        # "H:localhost.localdomain:8"
+        $job_id = $job_handle;
+    }
+
+    # Validate
+    unless ( $job_id =~ /^H:.+?:\d+?$/ )
+    {
+        LOGDIE( "Invalid job ID: $job_id" );
+    }
+
+    return $job_id;
 }
 
 sub set_job_progress($$$$)
@@ -321,7 +347,7 @@ sub show_jobs($)
         my $server_jobs = _show_jobs_on_server( $server );
         unless ( defined $server_jobs )
         {
-            say STDERR "Unable to fetch jobs from server $server.";
+            ERROR( "Unable to fetch jobs from server $server." );
             return undef;
         }
 
@@ -348,7 +374,7 @@ sub _show_jobs_on_server($)
         my @job = split( "\t", $line );
         unless ( scalar @job == 4 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
 
@@ -359,7 +385,7 @@ sub _show_jobs_on_server($)
 
         if ( defined $jobs->{ $job_id } )
         {
-            say STDERR "Job with job ID '$job_id' already exists in the jobs hashref, strange.";
+            ERROR( "Job with job ID '$job_id' already exists in the jobs hashref, strange." );
             return undef;
         }
 
@@ -382,7 +408,7 @@ sub cancel_job($)
         my $result = _cancel_job_on_server( $job_id, $server );
         unless ( $result )
         {
-            say STDERR "Unable to cancel job '$job_id' on server $server.";
+            ERROR( "Unable to cancel job '$job_id' on server $server." );
             return undef;
         }
     }
@@ -396,12 +422,12 @@ sub _cancel_job_on_server($$)
 
     unless ( $job_id )
     {
-        say STDERR "Job ID is empty.";
+        ERROR( "Job ID is empty." );
         return undef;
     }
     if ( $job_id =~ /\n/ or $job_id =~ /\r/ )
     {
-        say STDERR "Job ID can't contain line breaks";
+        ERROR( "Job ID can't contain line breaks." );
         return undef;
     }
 
@@ -413,7 +439,7 @@ sub _cancel_job_on_server($$)
 
     unless ( $job_cancelled eq 'OK' )
     {
-        say STDERR "Server $server didn't respond with 'OK': $job_cancelled";
+        ERROR( "Server $server didn't respond with 'OK': $job_cancelled" );
         return undef;
     }
 
@@ -431,7 +457,7 @@ sub server_status($$)
         my $status = _server_status_on_server( $server );
         unless ( defined $status )
         {
-            say STDERR "Unable to fetch status from server $server.";
+            ERROR( "Unable to fetch status from server $server." );
             return undef;
         }
 
@@ -458,7 +484,7 @@ sub _server_status_on_server($)
         my @function = split( "\t", $line );
         unless ( scalar @function == 4 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
 
@@ -469,7 +495,7 @@ sub _server_status_on_server($)
 
         if ( defined $functions->{ $function_name } )
         {
-            say STDERR "Function with name '$function_name' already exists in the functions hashref, strange.";
+            ERROR( "Function with name '$function_name' already exists in the functions hashref, strange." );
             return undef;
         }
 
@@ -494,7 +520,7 @@ sub workers($)
         my $server_workers = _workers_on_server( $server );
         unless ( defined $server_workers )
         {
-            say STDERR "Unable to fetch workers from server $server.";
+            ERROR( "Unable to fetch workers from server $server." );
             return undef;
         }
 
@@ -521,14 +547,14 @@ sub _workers_on_server($)
         my $colon_pos = index( $line, ':' );
         if ( $colon_pos == -1 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
 
         my @worker_description = split( /\s+/, substr( $line, 0, $colon_pos ) );
         unless ( scalar @worker_description == 3 )
         {
-            say STDERR "Unable to parse line from server $server: $line";
+            ERROR( "Unable to parse line from server $server: $line" );
             return undef;
         }
         my @worker_functions = split( /\s+/, substr( $line, $colon_pos + 1 ) );
@@ -624,7 +650,7 @@ sub _net_telnet_instance_for_server($)
     my $telnet = new Net::Telnet(
         Host    => $host,
         Port    => $port,
-        Timeout => GEARMAND_ADMIN_TIMEOUT
+        Timeout => $GEARMAND_ADMIN_TIMEOUT
     );
     $telnet->open();
 
@@ -656,22 +682,7 @@ sub _serialize_hashref($)
 
     # Gearman accepts only scalar arguments
     my $hashref_serialized = undef;
-    eval {
-
-        $hashref_serialized = $json->encode( $hashref );
-
-        # Try to deserialize, see if we get the same hashref
-        my $hashref_deserialized = $json->decode( $hashref_serialized );
-        unless ( Compare( $hashref, $hashref_deserialized ) )
-        {
-
-            my $error = "Serialized and deserialized hashrefs differ.\n";
-            $error .= "Original hashref: " . Dumper( $hashref );
-            $error .= "Deserialized hashref: " . Dumper( $hashref_deserialized );
-
-            LOGDIE( $error );
-        }
-    };
+    eval { $hashref_serialized = $json->encode( $hashref ); };
     if ( $@ )
     {
         LOGDIE( "Unable to serialize hashref with the JSON module: $@" );

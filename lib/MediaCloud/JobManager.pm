@@ -42,10 +42,9 @@ use Modern::Perl "2012";
 use MediaCloud::JobManager::Configuration;
 
 use Data::UUID;
-
 use Digest::SHA qw(sha256_hex);
-
 use Carp;
+use Readonly;
 
 use Log::Log4perl qw(:easy);
 Log::Log4perl->easy_init(
@@ -61,7 +60,7 @@ $| = 1;
 
 # Max. job ID length for MediaCloud::JobManager jobs (when
 # MediaCloud::JobManager::Job comes up with a job ID of its own)
-use constant MJM_JOB_ID_MAX_LENGTH => 256;
+Readonly my $MJM_JOB_ID_MAX_LENGTH => 256;
 
 =head2 (static) C<job_status($function_name, $job_id[, $config])>
 
@@ -175,8 +174,10 @@ sub _unique_path_job_id($$;$)
         # Thus, the job has to be logged to a location that can later be found
         # by knowing the job ID.
 
+        my $config = $function_name->configuration();
+
         # Strip the host part (if present)
-        $unique_id = _job_id_from_handle( $job_id );
+        $unique_id = $config->{ broker }->job_id_from_handle( $job_id );
 
     }
     else
@@ -196,9 +197,9 @@ sub _unique_path_job_id($$;$)
 
     # ID goes first in case the job name shortener decides to cut out a part of the job ID
     my $mjm_job_id = $unique_id . '.' . unique_job_id( $function_name, $job_args );
-    if ( length( $mjm_job_id ) > MJM_JOB_ID_MAX_LENGTH )
+    if ( length( $mjm_job_id ) > $MJM_JOB_ID_MAX_LENGTH )
     {
-        $mjm_job_id = substr( $mjm_job_id, 0, MJM_JOB_ID_MAX_LENGTH );
+        $mjm_job_id = substr( $mjm_job_id, 0, $MJM_JOB_ID_MAX_LENGTH );
     }
 
     # Sanitize for paths
@@ -214,43 +215,6 @@ sub _sanitize_for_path($)
     $string =~ s/[^a-zA-Z0-9\.\-_\(\)=,]/_/gi;
 
     return $string;
-}
-
-# Return job ID from job handle
-#
-# Parameters:
-# * job handle, e.g.:
-#     * "H:tundra.home:18" (as reported by an instance of Gearman::Job), or
-#     * "127.0.0.1:4730//H:tundra.home:18" (as reported by gearmand)
-#
-# Returns: job ID (e.g. "H:localhost.localdomain:8")
-#
-# Dies on error.
-sub _job_id_from_handle($)
-{
-    my $job_handle = shift;
-
-    my $job_id;
-
-    # Strip the host part (if present)
-    if ( index( $job_handle, '//' ) != -1 )
-    {
-        # "127.0.0.1:4730//H:localhost.localdomain:8"
-        my ( $server, $job_id ) = split( '//', $job_handle );
-    }
-    else
-    {
-        # "H:localhost.localdomain:8"
-        $job_id = $job_handle;
-    }
-
-    # Validate
-    unless ( $job_id =~ /^H:.+?:\d+?$/ )
-    {
-        LOGDIE( "Invalid job ID: $job_id" );
-    }
-
-    return $job_id;
 }
 
 1;

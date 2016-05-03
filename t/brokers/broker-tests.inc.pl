@@ -15,12 +15,6 @@ use MediaCloud::JobManager::Admin;
 use MediaCloud::JobManager::Configuration;
 use MediaCloud::JobManager::Worker;
 
-# Test workers
-use Gearman::ReverseStringWorker;
-use Gearman::FailsAlwaysWorker;
-use Gearman::FailsOnceWorker;
-use Gearman::FailsOnceWillRetryWorker;
-
 sub _worker_process($)
 {
     my $function_name = shift;

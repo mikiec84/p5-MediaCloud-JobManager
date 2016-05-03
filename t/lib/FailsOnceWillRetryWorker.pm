@@ -44,7 +44,12 @@ sub run($;$)
 
 sub retries()
 {
-    return 3;
+    die "This placeholder shouldn't be called.";
+}
+
+sub configuration
+{
+    die "This placeholder shouldn't be called.";
 }
 
 no Moose;    # gets rid of scaffolding

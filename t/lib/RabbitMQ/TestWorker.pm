@@ -1,4 +1,4 @@
-package Gearman::TestWorker;
+package RabbitMQ::TestWorker;
 
 use strict;
 use warnings;
@@ -9,15 +9,15 @@ with 'MediaCloud::JobManager::Job' => { -excludes => [ 'configuration' ], };
 use Data::Dumper;
 
 use MediaCloud::JobManager::Configuration;
-use MediaCloud::JobManager::Broker::Gearman;
+use MediaCloud::JobManager::Broker::RabbitMQ;
 
 sub configuration
 {
-    say STDERR "Using Gearman as a test job broker";
+    say STDERR "Using RabbitMQ as a test job broker";
 
-    # Configure TestWorker with Gearman broker
+    # Configure TestWorker with RabbitMQ broker
     my $configuration = MediaCloud::JobManager::Configuration->new();
-    $configuration->broker( MediaCloud::JobManager::Broker::Gearman->new() );
+    $configuration->broker( MediaCloud::JobManager::Broker::RabbitMQ->new() );
     return $configuration;
 }
 

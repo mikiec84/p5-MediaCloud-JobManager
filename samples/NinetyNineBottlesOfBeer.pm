@@ -9,9 +9,10 @@ with 'MediaCloud::JobManager::Job';
 
 use Time::HiRes qw(usleep nanosleep);
 use Data::Dumper;
+use Readonly;
 
 # in microseconds
-use constant SLEEP_BETWEEN_BOTTLES => 100000;
+Readonly my $SLEEP_BETWEEN_BOTTLES => 100000;
 
 # Run job
 sub run($;$)
@@ -24,17 +25,17 @@ sub run($;$)
     # http://www.99-bottles-of-beer.net/language-perl-539.html
     foreach ( reverse( 1 .. $how_many_bottles ) )
     {
-        my $s        = ( $_ == 1 ) ? "" : "s";
-        my $oneLessS = ( $_ == 2 ) ? "" : "s";
+        my $s          = ( $_ == 1 ) ? "" : "s";
+        my $one_less_s = ( $_ == 2 ) ? "" : "s";
         say STDERR "";
         say STDERR "$_ bottle$s of beer on the wall,";
         say STDERR "$_ bottle$s of beer,";
         say STDERR "Take one down, pass it around,";
-        say STDERR $_ - 1, " bottle${oneLessS} of beer on the wall";
+        say STDERR $_ - 1, " bottle${one_less_s} of beer on the wall";
 
         $self->set_progress( ( $how_many_bottles - $_ + 1 ), $how_many_bottles );
 
-        usleep( SLEEP_BETWEEN_BOTTLES );
+        usleep( $SLEEP_BETWEEN_BOTTLES );
     }
     say STDERR "";
     say STDERR "*burp*";
@@ -55,6 +56,13 @@ sub retries()
 sub unique()
 {
     return 1;
+}
+
+sub configuration()
+{
+    my $configuration = MediaCloud::JobManager::Configuration->new();
+    $configuration->broker( MediaCloud::JobManager::Broker::RabbitMQ->new() );
+    return $configuration;
 }
 
 no Moose;    # gets rid of scaffolding
