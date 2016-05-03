@@ -62,16 +62,11 @@ Readonly my %RABBITMQ_PRIORITIES => (
 # JSON (de)serializer
 my $json = JSON->new->allow_nonref->canonical->utf8;
 
-# RabbitMQ channel number
-# (channels shouldn't be shared between threads, so we use PID as default channel number)
-has '_channel_number' => ( is => 'rw', isa => 'Int', default => $$ );
-
 # Per-package Net::AMQP::RabbitMQ instance (so that we won't be reconnecting on every new())
 my $_mq;
 
 # Connection identifier (reconnect when the identifier changes)
 my $_mq_connection_identifier;
-
 
 # Constructor
 sub BUILD
@@ -111,7 +106,7 @@ sub BUILD
             LOGDIE( "Unable to connect to RabbitMQ: $@" );
         }
 
-        my $channel_number = $self->_channel_number;
+        my $channel_number = _channel_number();
         unless ( $channel_number )
         {
             LOGDIE( "Channel number is unset." );
@@ -146,11 +141,18 @@ sub _connection_identifier($$$$$$)
         $pid, $hostname, $port, $username, $password, $vhost, $timeout );
 }
 
+# Channel number we should be talking to
+sub _channel_number()
+{
+    # (channels shouldn't be shared between threads, so we use PID as default channel number)
+    return $$;
+}
+
 sub _declare_queue($$$$)
 {
     my ( $self, $queue_name, $durable, $declare_and_bind_exchange ) = @_;
 
-    my $channel_number = $self->_channel_number;
+    my $channel_number = _channel_number();
     my $options        = {
         durable     => $durable,
         auto_delete => 0,
@@ -217,7 +219,7 @@ sub _publish_json_message($$$;$$)
         LOGDIE( "Unable to encode JSON message: $@" );
     }
 
-    my $channel_number = $self->_channel_number;
+    my $channel_number = _channel_number();
 
     my $options = {};
     if ( $extra_options )
@@ -363,7 +365,7 @@ sub _process_worker_message($$$)
     }
 
     # ACK the message (mark the job as completed)
-    eval { $_mq->ack( $self->_channel_number, $delivery_tag ); };
+    eval { $_mq->ack( _channel_number(), $delivery_tag ); };
     if ( $@ )
     {
         LOGDIE( "Unable to mark job $celery_job_id as completed: $@" );
@@ -381,7 +383,7 @@ sub start_worker($$)
         # Don't assume that the job is finished when it reaches the worker
         no_ack => 0,
     };
-    my $consumer_tag = $_mq->consume( $self->_channel_number, $function_name, $consume_options );
+    my $consumer_tag = $_mq->consume( _channel_number(), $function_name, $consume_options );
 
     INFO( "Consumer tag: $consumer_tag" );
     INFO( "Worker is ready and accepting jobs" );
@@ -403,7 +405,7 @@ sub run_job_sync($$$$$)
     my $reply_to_queue = $celery_job_id;
 
     # Declare result queue
-    my $channel_number = $self->_channel_number;
+    my $channel_number = _channel_number();
     eval { $self->_declare_results_queue( $reply_to_queue ); };
     if ( $@ )
     {
