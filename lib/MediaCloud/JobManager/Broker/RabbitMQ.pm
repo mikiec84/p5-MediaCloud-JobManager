@@ -237,8 +237,8 @@ sub _results_cache_hashref($$)
 # Channel number we should be talking to
 sub _channel_number()
 {
-    # Channels shouldn't be shared between threads, so we use PID as default channel number
-    return $$;
+    # Each PID + credentials pair has its own connection so we can just use constant channel
+    return 1;
 }
 
 sub _declare_queue($$$$)
