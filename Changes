@@ -1,5 +1,10 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.20   2016-05-04
+    * Remove unique() from workers because RabbitMQ doesn't support merging
+      jobs with identical arguments into one.
+    * Don't use PIDs for RabbitMQ channel numbers.
+
 0.19   2016-05-03
     * Add basic RabbitMQ job broker support using Celery as message protocol.
 
