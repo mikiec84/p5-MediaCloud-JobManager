@@ -30,7 +30,7 @@ Parameters:
 
 requires 'start_worker';
 
-=head2 C<$self-E<gt>run_job_sync($function_name, $args, $priority, $unique)>
+=head2 C<$self-E<gt>run_job_sync($function_name, $args, $priority)>
 
 Run a job synchronously (wait for the job to complete and return the result).
 
@@ -50,7 +50,7 @@ Returns job result (whatever the job subroutine returned).
 
 requires 'run_job_sync';
 
-=head2 C<$self-E<gt>run_job_async($function_name, $args, $priority, $unique)>
+=head2 C<$self-E<gt>run_job_async($function_name, $args, $priority)>
 
 Run a job asynchronously (add job to the job queue and return instantly).
 

@@ -7,9 +7,6 @@ package MediaCloud::JobManager::Broker::RabbitMQ;
 #
 # MediaCloud::JobManager::Broker::RabbitMQ->new();
 #
-# FIXME unique tasks (http://engineroom.trackmaven.com/blog/announcing-celery-once/)
-# FIXME try deleting queue with responses when client exits
-# FIXME remove unique(), consider adding do_not_expect_result()
 
 use strict;
 use warnings;
@@ -491,14 +488,14 @@ sub start_worker($$)
     }
 }
 
-sub run_job_sync($$$$$)
+sub run_job_sync($$$$)
 {
-    my ( $self, $function_name, $args, $priority, $unique ) = @_;
+    my ( $self, $function_name, $args, $priority ) = @_;
 
     my $mq = $self->_mq();
 
     # Post the job
-    my $celery_job_id = $self->run_job_async( $function_name, $args, $priority, $unique );
+    my $celery_job_id = $self->run_job_async( $function_name, $args, $priority );
 
     # Declare result queue
     my $reply_to_queue = $self->_reply_to_queue( $function_name );
@@ -610,7 +607,7 @@ sub run_job_sync($$$$$)
 
 sub run_job_async($$$$$)
 {
-    my ( $self, $function_name, $args, $priority, $unique ) = @_;
+    my ( $self, $function_name, $args, $priority ) = @_;
 
     unless ( defined( $args ) )
     {

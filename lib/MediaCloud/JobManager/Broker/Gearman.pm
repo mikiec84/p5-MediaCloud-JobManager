@@ -136,9 +136,9 @@ sub start_worker($$)
     }
 }
 
-sub run_job_sync($$$$$)
+sub run_job_sync($$$$)
 {
-    my ( $self, $function_name, $args, $priority, $unique ) = @_;
+    my ( $self, $function_name, $args, $priority ) = @_;
 
     my $args_serialized = _serialize_hashref( $args );
 
@@ -149,17 +149,7 @@ sub run_job_sync($$$$$)
     my $client = $self->_gearman_xs_client();
 
     # Client arguments
-    my @client_args;
-    if ( $unique )
-    {
-        # If the job is set to be "unique", we need to pass a "unique identifier"
-        # to broker so that it knows which jobs to merge into one
-        @client_args = ( $function_name, $args_serialized, MediaCloud::JobManager::unique_job_id( $function_name, $args ) );
-    }
-    else
-    {
-        @client_args = ( $function_name, $args_serialized );
-    }
+    my @client_args = ( $function_name, $args_serialized );
 
     # Choose the client subroutine to use (based on the priority)
     my $client_do_ref = undef;
@@ -203,7 +193,7 @@ sub run_job_sync($$$$$)
 
 sub run_job_async($$$$$)
 {
-    my ( $self, $function_name, $args, $priority, $unique ) = @_;
+    my ( $self, $function_name, $args, $priority ) = @_;
 
     my $args_serialized = _serialize_hashref( $args );
 
@@ -214,17 +204,7 @@ sub run_job_async($$$$$)
     my $client = $self->_gearman_xs_client();
 
     # Client arguments
-    my @client_args;
-    if ( $unique )
-    {
-        # If the job is set to be "unique", we need to pass a "unique identifier"
-        # to broker so that it knows which jobs to merge into one
-        @client_args = ( $function_name, $args_serialized, MediaCloud::JobManager::unique_job_id( $function_name, $args ) );
-    }
-    else
-    {
-        @client_args = ( $function_name, $args_serialized );
-    }
+    my @client_args = ( $function_name, $args_serialized );
 
     # Choose the client subroutine to use (based on the priority)
     my $client_do_ref = undef;
