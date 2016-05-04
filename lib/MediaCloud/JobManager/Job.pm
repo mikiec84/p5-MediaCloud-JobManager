@@ -114,25 +114,6 @@ sub retries()
     return 0;
 }
 
-=head3 (static) C<unique()>
-
-Return true if the function is "unique" (only for remote requests).
-
-Returns true if two or more jobs with the same parameters can not be run at the
-same and instead should be merged into one.
-
-Default implementation of this subroutine returns "true".
-
-=cut
-
-sub unique()
-{
-    # By default the jobs are "unique", e.g. if there's already an
-    # "Addition({operand_a => 2, operand_b => 3})" job running, a new one won't
-    # be initialized
-    return 1;
-}
-
 =head3 (static) C<configuration()>
 
 Return an instance or a subclass of C<MediaCloud::JobManager::Configuration> to
@@ -409,7 +390,7 @@ sub run_remotely($;$)
 
     my $config = $function_name->configuration();
 
-    return $config->{ broker }->run_job_sync( $function_name, $args, $class->priority(), $class->unique() );
+    return $config->{ broker }->run_job_sync( $function_name, $args, $class->priority() );
 }
 
 sub run_on_gearman
@@ -457,7 +438,7 @@ sub add_to_queue($;$)
 
     my $config = $function_name->configuration();
 
-    return $config->{ broker }->run_job_async( $function_name, $args, $class->priority(), $class->unique() );
+    return $config->{ broker }->run_job_async( $function_name, $args, $class->priority() );
 }
 
 sub enqueue_on_gearman

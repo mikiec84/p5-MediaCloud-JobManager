@@ -52,12 +52,6 @@ sub retries()
     return 3;
 }
 
-# Don't allow two or more jobs with the same parameters to run at once?
-sub unique()
-{
-    return 1;
-}
-
 sub configuration()
 {
     my $configuration = MediaCloud::JobManager::Configuration->new();

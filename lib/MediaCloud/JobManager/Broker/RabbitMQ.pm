@@ -7,9 +7,6 @@ package MediaCloud::JobManager::Broker::RabbitMQ;
 #
 # MediaCloud::JobManager::Broker::RabbitMQ->new();
 #
-# FIXME unique tasks (http://engineroom.trackmaven.com/blog/announcing-celery-once/)
-# FIXME try deleting queue with responses when client exits
-# FIXME remove unique(), consider adding do_not_expect_result()
 
 use strict;
 use warnings;
@@ -163,11 +160,6 @@ sub _mq($)
         {
             LOGDIE( "Channel number is unset." );
         }
-        my $max_channel_number = $mq->get_channel_max();
-        if ( $channel_number > $max_channel_number )
-        {
-            LOGDIE( "Channel number (PID) $channel_number is bigger than max. channel number $max_channel_number" );
-        }
 
         eval {
             $mq->channel_open( $channel_number );
@@ -197,8 +189,6 @@ sub _reply_to_queue($$)
 
     unless ( defined $_reply_to_queues_for_connection_id_function_name{ $conn_id } )
     {
-        # Should have been defined in _mq()
-        WARN( "'reply_to' queue for connection ID '$conn_id' is not a hash." );
         $_reply_to_queues_for_connection_id_function_name{ $conn_id } = ();
     }
 
@@ -220,8 +210,6 @@ sub _results_cache_hashref($$)
 
     unless ( defined $_results_caches_for_connection_id_function_name{ $conn_id } )
     {
-        # Should have been defined in _mq()
-        WARN( "Results cache for connection ID '$conn_id' is not a hash." );
         $_results_caches_for_connection_id_function_name{ $conn_id } = ();
     }
 
@@ -242,8 +230,8 @@ sub _results_cache_hashref($$)
 # Channel number we should be talking to
 sub _channel_number()
 {
-    # Channels shouldn't be shared between threads, so we use PID as default channel number
-    return $$;
+    # Each PID + credentials pair has its own connection so we can just use constant channel
+    return 1;
 }
 
 sub _declare_queue($$$$)
@@ -500,14 +488,14 @@ sub start_worker($$)
     }
 }
 
-sub run_job_sync($$$$$)
+sub run_job_sync($$$$)
 {
-    my ( $self, $function_name, $args, $priority, $unique ) = @_;
+    my ( $self, $function_name, $args, $priority ) = @_;
 
     my $mq = $self->_mq();
 
     # Post the job
-    my $celery_job_id = $self->run_job_async( $function_name, $args, $priority, $unique );
+    my $celery_job_id = $self->run_job_async( $function_name, $args, $priority );
 
     # Declare result queue
     my $reply_to_queue = $self->_reply_to_queue( $function_name );
@@ -619,7 +607,7 @@ sub run_job_sync($$$$$)
 
 sub run_job_async($$$$$)
 {
-    my ( $self, $function_name, $args, $priority, $unique ) = @_;
+    my ( $self, $function_name, $args, $priority ) = @_;
 
     unless ( defined( $args ) )
     {
