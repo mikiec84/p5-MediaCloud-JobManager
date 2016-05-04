@@ -192,8 +192,6 @@ sub _reply_to_queue($$)
 
     unless ( defined $_reply_to_queues_for_connection_id_function_name{ $conn_id } )
     {
-        # Should have been defined in _mq()
-        WARN( "'reply_to' queue for connection ID '$conn_id' is not a hash." );
         $_reply_to_queues_for_connection_id_function_name{ $conn_id } = ();
     }
 
@@ -215,8 +213,6 @@ sub _results_cache_hashref($$)
 
     unless ( defined $_results_caches_for_connection_id_function_name{ $conn_id } )
     {
-        # Should have been defined in _mq()
-        WARN( "Results cache for connection ID '$conn_id' is not a hash." );
         $_results_caches_for_connection_id_function_name{ $conn_id } = ();
     }
 
