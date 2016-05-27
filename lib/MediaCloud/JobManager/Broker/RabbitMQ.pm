@@ -137,22 +137,46 @@ sub _mq($)
         # Connect to RabbitMQ, open channel
         DEBUG( "Connecting to RabbitMQ (PID: $$, hostname: " .
               $self->_hostname . ", port: " . $self->_port . ", username: " . $self->_username . ")..." );
-        my $mq = Net::AMQP::RabbitMQ->new();
-        eval {
-            $mq->connect(
-                $self->_hostname,
-                {
-                    user     => $self->_username,
-                    password => $self->_password,
-                    port     => $self->_port,
-                    vhost    => $self->_vhost,
-                    timeout  => $self->_timeout,
-                }
-            );
-        };
-        if ( $@ )
+
+        # RabbitMQ might not yet be up at the time of connecting, so try for up to a minute
+        my $mq;
+        my $connected = 0;
+        my $last_error_message;
+        for ( my $retry = 0 ; $retry < 60 ; ++$retry )
         {
-            LOGDIE( "Unable to connect to RabbitMQ: $@" );
+            eval {
+                if ( $retry > 0 )
+                {
+                    DEBUG( "Retrying #$retry..." );
+                }
+
+                $mq = Net::AMQP::RabbitMQ->new();
+                $mq->connect(
+                    $self->_hostname,
+                    {
+                        user     => $self->_username,
+                        password => $self->_password,
+                        port     => $self->_port,
+                        vhost    => $self->_vhost,
+                        timeout  => $self->_timeout,
+                    }
+                );
+            };
+            if ( $@ )
+            {
+                $last_error_message = $@;
+                WARN( "Unable to connect to RabbitMQ, will retry: $last_error_message" );
+                sleep( 1 );
+            }
+            else
+            {
+                $connected = 1;
+                last;
+            }
+        }
+        unless ( $connected )
+        {
+            LOGDIE( "Unable to connect to RabbitMQ, giving up: $last_error_message" );
         }
 
         my $channel_number = _channel_number();
