@@ -60,8 +60,6 @@ sub start_worker($)
 
     INFO( "Starting function '$function_name' from '$function_name_or_path'." );
 
-    INFO( "Job priority: " . $function_name->priority() );
-
     $config->{ broker }->start_worker( $function_name );
 
     INFO( "Done." );

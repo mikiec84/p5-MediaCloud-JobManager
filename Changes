@@ -1,5 +1,9 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.21   2016-05-27
+    * Retry connecting to RabbitMQ for a minute when starting a client.
+    * Don't print default job priority when starting a worker.
+
 0.20   2016-05-04
     * Remove unique() from workers because RabbitMQ doesn't support merging
       jobs with identical arguments into one.
