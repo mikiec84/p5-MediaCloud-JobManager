@@ -1,5 +1,10 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.22   2016-05-30
+    * Add support for RabbitMQ's "lazy queues"
+      (https://www.rabbitmq.com/lazy-queues.html, configurable per-function) to
+      handle large queues without a huge memory pressure.
+
 0.21   2016-05-27
     * Retry connecting to RabbitMQ for a minute when starting a client.
     * Don't print default job priority when starting a worker.

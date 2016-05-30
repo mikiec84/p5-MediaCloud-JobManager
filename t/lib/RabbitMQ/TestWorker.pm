@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Moose::Role;
-with 'MediaCloud::JobManager::Job' => { -excludes => [ 'configuration' ], };
+with 'MediaCloud::JobManager::Job' => { -excludes => [ 'configuration', 'lazy_queue' ], };
 
 use Data::Dumper;
 
@@ -19,6 +19,11 @@ sub configuration
     my $configuration = MediaCloud::JobManager::Configuration->new();
     $configuration->broker( MediaCloud::JobManager::Broker::RabbitMQ->new() );
     return $configuration;
+}
+
+sub lazy_queue()
+{
+    return 1;
 }
 
 1;
