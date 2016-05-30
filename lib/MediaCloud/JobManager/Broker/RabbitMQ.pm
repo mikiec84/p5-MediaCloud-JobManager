@@ -258,9 +258,9 @@ sub _channel_number()
     return 1;
 }
 
-sub _declare_queue($$$$)
+sub _declare_queue($$$$;$)
 {
-    my ( $self, $queue_name, $durable, $declare_and_bind_exchange ) = @_;
+    my ( $self, $queue_name, $durable, $declare_and_bind_exchange, $lazy_queue ) = @_;
 
     my $mq = $self->_mq();
 
@@ -269,7 +269,10 @@ sub _declare_queue($$$$)
         durable     => $durable,
         auto_delete => 0,
     };
-    my $arguments = { 'x-max-priority' => _priority_count(), };
+    my $arguments = {
+        'x-max-priority' => _priority_count(),
+        'x-queue-mode'   => ( $lazy_queue ? 'lazy' : 'default' ),
+    };
 
     eval { $mq->queue_declare( $channel_number, $queue_name, $options, $arguments ); };
     if ( $@ )
@@ -300,24 +303,24 @@ sub _declare_queue($$$$)
     }
 }
 
-sub _declare_task_queue($$)
+sub _declare_task_queue($$;$)
 {
-    my ( $self, $queue_name ) = @_;
+    my ( $self, $queue_name, $lazy_queue ) = @_;
 
     my $durable                   = $RABBITMQ_QUEUE_DURABLE;
     my $declare_and_bind_exchange = 1;
 
-    return $self->_declare_queue( $queue_name, $durable, $declare_and_bind_exchange );
+    return $self->_declare_queue( $queue_name, $durable, $declare_and_bind_exchange, $lazy_queue );
 }
 
-sub _declare_results_queue($$)
+sub _declare_results_queue($$;$)
 {
-    my ( $self, $queue_name ) = @_;
+    my ( $self, $queue_name, $lazy_queue ) = @_;
 
     my $durable                   = $RABBITMQ_QUEUE_TRANSIENT;
     my $declare_and_bind_exchange = 0;
 
-    return $self->_declare_queue( $queue_name, $durable, $declare_and_bind_exchange );
+    return $self->_declare_queue( $queue_name, $durable, $declare_and_bind_exchange, $lazy_queue );
 }
 
 sub _publish_json_message($$$;$$)
@@ -460,7 +463,7 @@ sub _process_worker_message($$$)
 
     # Send message back with the job result
     eval {
-        $self->_declare_results_queue( $reply_to );
+        $self->_declare_results_queue( $reply_to, $function_name->lazy_queue() );
         $self->_publish_json_message(
             $reply_to,
             $response,
@@ -494,7 +497,7 @@ sub start_worker($$)
 
     my $mq = $self->_mq();
 
-    $self->_declare_task_queue( $function_name );
+    $self->_declare_task_queue( $function_name, $function_name->lazy_queue() );
 
     my $consume_options = {
 
@@ -523,7 +526,7 @@ sub run_job_sync($$$$)
 
     # Declare result queue
     my $reply_to_queue = $self->_reply_to_queue( $function_name );
-    eval { $self->_declare_results_queue( $reply_to_queue ); };
+    eval { $self->_declare_results_queue( $reply_to_queue, $function_name->lazy_queue() ); };
     if ( $@ )
     {
         LOGDIE( "Unable to declare results queue '$reply_to_queue': $@" );
@@ -662,11 +665,11 @@ sub run_job_async($$$$$)
     };
 
     # Declare task queue
-    $self->_declare_task_queue( $function_name );
+    $self->_declare_task_queue( $function_name, $function_name->lazy_queue() );
 
     # Declare result queue before posting a job (just like Celery does)
     my $reply_to_queue = $self->_reply_to_queue( $function_name );
-    $self->_declare_results_queue( $reply_to_queue );
+    $self->_declare_results_queue( $reply_to_queue, $function_name->lazy_queue() );
 
     # Post a job
     eval {

@@ -116,6 +116,25 @@ sub retries()
     return 0;
 }
 
+=head3 (static) C<lazy_queue()>
+
+Return true if RabbitMQ should create a "lazy" queue for this function.
+
+Returns true if the job queue is expected to grow very large so RabbitMQ should
+create a "lazy" queue (https://www.rabbitmq.com/lazy-queues.html) for this type
+of job.
+
+This helper does nothing when Gearman job broker is being used.
+
+Default implementation of this subroutine returns 0 ("default" type of queue).
+
+=cut
+
+sub lazy_queue()
+{
+    return 0;
+}
+
 =head3 (static) C<configuration()>
 
 Return an instance or a subclass of C<MediaCloud::JobManager::Configuration> to
