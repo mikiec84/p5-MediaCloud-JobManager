@@ -95,6 +95,8 @@ Writes log to C<STDOUT> or C<STDERR> (preferably the latter).
 
 requires 'run';
 
+=head2 OPTIONAL
+
 =head3 (static) C<retries()>
 
 Return the number of retries for each job.
