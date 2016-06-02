@@ -25,11 +25,6 @@ sub run($;$)
     return $a + $b;
 }
 
-sub priority()
-{
-    return $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW;
-}
-
 sub lazy_queue()
 {
     return 1;

@@ -33,7 +33,7 @@ sub run($;$)
         say STDERR "Take one down, pass it around,";
         say STDERR $_ - 1, " bottle${one_less_s} of beer on the wall";
 
-        $self->set_progress( ( $how_many_bottles - $_ + 1 ), $how_many_bottles );
+        # $self->set_progress( ( $how_many_bottles - $_ + 1 ), $how_many_bottles );
 
         usleep( $SLEEP_BETWEEN_BOTTLES );
     }
@@ -41,8 +41,6 @@ sub run($;$)
     say STDERR "*burp*";
 
     say STDOUT "I think I'm done here.";
-
-    return 1;
 }
 
 # Return a number of retries (0 for no retries)
@@ -50,6 +48,12 @@ sub retries()
 {
     # The job will be attempted 4 times in total
     return 3;
+}
+
+# Won't publish results back to the client
+sub publish_results()
+{
+    return 0;
 }
 
 sub configuration()

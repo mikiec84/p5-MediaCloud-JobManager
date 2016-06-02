@@ -135,6 +135,30 @@ sub lazy_queue()
     return 0;
 }
 
+=head3 (static) C<publish_results()>
+
+Return true if worker should publish results back to a results RabbitMQ queue.
+
+Returns true if client that added job to the queue might be interested in the
+results of the job (whether or not it has failed, what has run() returned) so
+RabbitMQ should keep a result of the job and send it back to client when
+requested.
+
+One might want to disable this if distinct results of many jobs aren't that
+important and you'd like to make job broker a little bit faster.
+
+This subroutine will only be used when calling add_to_queue().
+
+Default implementation of this subroutine returns 1 (results will be collected,
+stored and sent back to clients if requested).
+
+=cut
+
+sub publish_results()
+{
+    return 1;
+}
+
 =head3 (static) C<configuration()>
 
 Return an instance or a subclass of C<MediaCloud::JobManager::Configuration> to
@@ -154,12 +178,10 @@ sub configuration()
     return MediaCloud::JobManager::Configuration->instance;
 }
 
-=head3 (static) C<priority()>
+=head3 Priorities
 
-Return priority of the job ("low", "normal" or "high"). This will influence the
-queueing mechanism and prioritize "high priority" jobs.
-
-Returns one of the three constants:
+Jobs in a single queue can have different priorities ("low", "normal" or
+"high") in order for them to be run in desirable order:
 
 =over 4
 
@@ -171,8 +193,9 @@ Returns one of the three constants:
 
 =back
 
-Default implementation of this subroutine returns C<$MJM_JOB_PRIORITY_NORMAL>
-("normal priority" job).
+C<run_remotely()> and C<add_to_queue()> both accept the job priority argument.
+
+By default, jobs are being run with a "normal" priority.
 
 =cut
 
@@ -181,15 +204,21 @@ Readonly our $MJM_JOB_PRIORITY_LOW    => 'low';
 Readonly our $MJM_JOB_PRIORITY_NORMAL => 'normal';
 Readonly our $MJM_JOB_PRIORITY_HIGH   => 'high';
 
-# Job priorities (subroutines for backwards compatibility)
+# Subroutines for backwards compatibility
 sub MJM_JOB_PRIORITY_LOW    { return $MJM_JOB_PRIORITY_LOW }
 sub MJM_JOB_PRIORITY_NORMAL { return $MJM_JOB_PRIORITY_NORMAL }
 sub MJM_JOB_PRIORITY_HIGH   { return $MJM_JOB_PRIORITY_HIGH }
 
-sub priority()
+Readonly my %valid_priorities => (
+    $MJM_JOB_PRIORITY_LOW    => 1,
+    $MJM_JOB_PRIORITY_NORMAL => 1,
+    $MJM_JOB_PRIORITY_HIGH   => 1,
+);
+
+sub _priority_is_valid($)
 {
-    # Default priority
-    return $MJM_JOB_PRIORITY_NORMAL;
+    my $priority = shift;
+    return exists $valid_priorities{ $priority };
 }
 
 =head1 HELPER SUBROUTINES
@@ -298,6 +327,8 @@ sub run_locally($;$$)
 
         my $d = Data::Dumper->new( [ $args ], [ 'args' ] );
         $d->Indent( 0 );
+        $d->Sortkeys( 1 );
+
         my $str_arguments = $d->Dump;
 
         INFO( "Starting job ID \"$mjm_job_id\"..." );
@@ -393,10 +424,9 @@ Returns result (may be false of C<undef>) on success, C<die()>s on error
 
 =cut
 
-sub run_remotely($;$)
+sub run_remotely($;$$)
 {
-    my $class = shift;
-    my $args  = shift;
+    my ( $class, $args, $priority ) = @_;
 
     if ( ref $class )
     {
@@ -411,7 +441,13 @@ sub run_remotely($;$)
 
     my $config = $function_name->configuration();
 
-    return $config->{ broker }->run_job_sync( $function_name, $args, $class->priority() );
+    $priority //= $MJM_JOB_PRIORITY_NORMAL;
+    unless ( _priority_is_valid( $priority ) )
+    {
+        LOGDIE( "Job priority '$priority' is not valid." );
+    }
+
+    return $config->{ broker }->run_job_sync( $function_name, $args, $priority );
 }
 
 sub run_on_gearman
@@ -441,10 +477,9 @@ Returns job ID if the job was added to queue successfully, C<die()>s on error.
 
 =cut
 
-sub add_to_queue($;$)
+sub add_to_queue($;$$)
 {
-    my $class = shift;
-    my $args  = shift;
+    my ( $class, $args, $priority ) = @_;
 
     if ( ref $class )
     {
@@ -459,7 +494,13 @@ sub add_to_queue($;$)
 
     my $config = $function_name->configuration();
 
-    return $config->{ broker }->run_job_async( $function_name, $args, $class->priority() );
+    $priority //= $MJM_JOB_PRIORITY_NORMAL;
+    unless ( _priority_is_valid( $priority ) )
+    {
+        LOGDIE( "Job priority '$priority' is not valid." );
+    }
+
+    return $config->{ broker }->run_job_async( $function_name, $args, $priority );
 }
 
 sub enqueue_on_gearman

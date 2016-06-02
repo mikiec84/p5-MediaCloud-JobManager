@@ -21,7 +21,7 @@ sub main()
 
     for ( my $x = 1 ; $x < 100 ; ++$x )
     {
-        my $job_id = Addition->add_to_queue( { a => 3, b => 5 } );
+        my $job_id = Addition->add_to_queue( { a => 3, b => 5 }, $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW );
         say STDERR "Job ID: $job_id";
         push( @job_ids, $job_id );
     }
@@ -31,10 +31,12 @@ sub main()
 
     for ( my $x = 1 ; $x < 10 ; ++$x )
     {
-        my $result = Addition->run_remotely( { a => 3, b => 5 } );
+        my $result = Addition->run_remotely( { a => 3, b => 5 }, $MediaCloud::JobManager::Job::MJM_JOB_PRIORITY_LOW );
         say STDERR "Job result: " . $result;
     }
 
+    # Job doesn't publish results so just add it
+    NinetyNineBottlesOfBeer->add_to_queue( { how_many_bottles => 4 } );
 }
 
 main();

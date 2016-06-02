@@ -262,6 +262,11 @@ sub _declare_queue($$$$;$)
 {
     my ( $self, $queue_name, $durable, $declare_and_bind_exchange, $lazy_queue ) = @_;
 
+    unless ( defined $queue_name )
+    {
+        LOGCONFESS( 'Queue name is undefined' );
+    }
+
     my $mq = $self->_mq();
 
     my $channel_number = _channel_number();
@@ -307,6 +312,11 @@ sub _declare_task_queue($$;$)
 {
     my ( $self, $queue_name, $lazy_queue ) = @_;
 
+    unless ( defined $queue_name )
+    {
+        LOGCONFESS( 'Queue name is undefined' );
+    }
+
     my $durable                   = $RABBITMQ_QUEUE_DURABLE;
     my $declare_and_bind_exchange = 1;
 
@@ -316,6 +326,11 @@ sub _declare_task_queue($$;$)
 sub _declare_results_queue($$;$)
 {
     my ( $self, $queue_name, $lazy_queue ) = @_;
+
+    unless ( defined $queue_name )
+    {
+        LOGCONFESS( 'Queue name is undefined' );
+    }
 
     my $durable                   = $RABBITMQ_QUEUE_TRANSIENT;
     my $declare_and_bind_exchange = 0;
@@ -328,6 +343,15 @@ sub _publish_json_message($$$;$$)
     my ( $self, $routing_key, $payload, $extra_options, $extra_props ) = @_;
 
     my $mq = $self->_mq();
+
+    unless ( $routing_key )
+    {
+        LOGCONFESS( 'Routing key is undefined.' );
+    }
+    unless ( $payload )
+    {
+        LOGCONFESS( 'Payload is undefined.' );
+    }
 
     my $payload_json;
     eval { $payload_json = $json->encode( $payload ); };
@@ -394,11 +418,9 @@ sub _process_worker_message($$$)
         LOGDIE( '"correlation_id" is empty.' );
     }
 
+    # "reply_to" might be empty if sending back job results is disabled via
+    # !publish_results()
     my $reply_to = $message->{ props }->{ reply_to };
-    unless ( $reply_to )
-    {
-        LOGDIE( '"reply_to" is empty.' );
-    }
 
     my $priority = $message->{ props }->{ priority } // 0;
 
@@ -434,53 +456,60 @@ sub _process_worker_message($$$)
     eval { $job_result = $function_name->run_locally( $args, $celery_job_id ); };
     my $error_message = $@;
 
-    # Construct response based on whether the job succeeded or failed
-    my $response;
-    if ( $error_message )
-    {
-        ERROR( "Job '$celery_job_id' died: $@" );
-        $response = {
-            'status'    => 'FAILURE',
-            'traceback' => "Job died: $error_message",
-            'result'    => {
-                'exc_message' => 'Task has failed',
-                'exc_type'    => 'Exception',
-            },
-            'task_id'  => $celery_job_id,
-            'children' => []
-        };
-    }
-    else
-    {
-        $response = {
-            'status'    => 'SUCCESS',
-            'traceback' => undef,
-            'result'    => $job_result,
-            'task_id'   => $celery_job_id,
-            'children'  => []
-        };
-    }
+    # If the job has failed, run_locally() has already printed the error
+    # message multiple times at this point so we don't repeat outselves
 
-    # Send message back with the job result
-    eval {
-        $self->_declare_results_queue( $reply_to, $function_name->lazy_queue() );
-        $self->_publish_json_message(
-            $reply_to,
-            $response,
-            {
-                # Options
-            },
-            {
-                # Properties
-                delivery_mode  => $RABBITMQ_DELIVERY_MODE_NONPERSISTENT,
-                priority       => $priority,
-                correlation_id => $celery_job_id,
-            }
-        );
-    };
-    if ( $@ )
-    {
-        LOGDIE( "Unable to publish job $celery_job_id result: $@" );
+    if ( $reply_to )
+    {    # undef if !publish_results()
+
+        # Construct response based on whether the job succeeded or failed
+        my $response;
+        if ( $error_message )
+        {
+            ERROR( "Job '$celery_job_id' died: $@" );
+            $response = {
+                'status'    => 'FAILURE',
+                'traceback' => "Job died: $error_message",
+                'result'    => {
+                    'exc_message' => 'Task has failed',
+                    'exc_type'    => 'Exception',
+                },
+                'task_id'  => $celery_job_id,
+                'children' => []
+            };
+        }
+        else
+        {
+            $response = {
+                'status'    => 'SUCCESS',
+                'traceback' => undef,
+                'result'    => $job_result,
+                'task_id'   => $celery_job_id,
+                'children'  => []
+            };
+        }
+
+        # Send message back with the job result
+        eval {
+            $self->_declare_results_queue( $reply_to, $function_name->lazy_queue() );
+            $self->_publish_json_message(
+                $reply_to,
+                $response,
+                {
+                    # Options
+                },
+                {
+                    # Properties
+                    delivery_mode  => $RABBITMQ_DELIVERY_MODE_NONPERSISTENT,
+                    priority       => $priority,
+                    correlation_id => $celery_job_id,
+                }
+            );
+        };
+        if ( $@ )
+        {
+            LOGDIE( "Unable to publish job $celery_job_id result: $@" );
+        }
     }
 
     # ACK the message (mark the job as completed)
@@ -522,9 +551,10 @@ sub run_job_sync($$$$)
     my $mq = $self->_mq();
 
     # Post the job
-    my $celery_job_id = $self->run_job_async( $function_name, $args, $priority );
+    my $publish_results = 1;    # always publish results when running synchronously
+    my $celery_job_id = $self->_run_job_on_rabbitmq( $function_name, $args, $priority, $publish_results );
 
-    # Declare result queue
+    # Declare result queue (ignore function's publish_results())
     my $reply_to_queue = $self->_reply_to_queue( $function_name );
     eval { $self->_declare_results_queue( $reply_to_queue, $function_name->lazy_queue() ); };
     if ( $@ )
@@ -632,9 +662,16 @@ sub run_job_sync($$$$)
     }
 }
 
-sub run_job_async($$$$$)
+sub run_job_async($$$$)
 {
     my ( $self, $function_name, $args, $priority ) = @_;
+
+    return $self->_run_job_on_rabbitmq( $function_name, $args, $priority, $function_name->publish_results() );
+}
+
+sub _run_job_on_rabbitmq($$$$$)
+{
+    my ( $self, $function_name, $args, $priority, $publish_results ) = @_;
 
     unless ( defined( $args ) )
     {
@@ -667,13 +704,21 @@ sub run_job_async($$$$$)
     # Declare task queue
     $self->_declare_task_queue( $function_name, $function_name->lazy_queue() );
 
-    # Declare result queue before posting a job (just like Celery does)
-    my $reply_to_queue = $self->_reply_to_queue( $function_name );
-    $self->_declare_results_queue( $reply_to_queue, $function_name->lazy_queue() );
+    my $reply_to_queue;
+    if ( $publish_results )
+    {
+        # Declare result queue before posting a job (just like Celery does)
+        $reply_to_queue = $self->_reply_to_queue( $function_name );
+        $self->_declare_results_queue( $reply_to_queue, $function_name->lazy_queue() );
+    }
+    else
+    {
+        $reply_to_queue = '';    # undef doesn't work with Net::AMQP::RabbitMQ
+    }
 
     # Post a job
     eval {
-        my $priority = _priority_to_int( $function_name->priority() );
+        my $rabbitmq_priority = _priority_to_int( $priority );
         $self->_publish_json_message(
             $function_name,
             $payload,
@@ -684,7 +729,7 @@ sub run_job_async($$$$$)
             {
                 # Properties
                 delivery_mode  => $RABBITMQ_DELIVERY_MODE_PERSISTENT,
-                priority       => $priority,
+                priority       => $rabbitmq_priority,
                 correlation_id => $celery_job_id,
                 reply_to       => $reply_to_queue,
             }
