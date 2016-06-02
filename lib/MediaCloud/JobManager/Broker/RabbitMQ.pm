@@ -461,6 +461,9 @@ sub _process_worker_message($$$)
         };
     }
 
+    # If the job has failed, run_locally() has already printed the error
+    # message multiple times at this point so we don't repeat outselves
+
     # Send message back with the job result
     eval {
         $self->_declare_results_queue( $reply_to, $function_name->lazy_queue() );
