@@ -322,6 +322,8 @@ sub run_locally($;$$)
 
         my $d = Data::Dumper->new( [ $args ], [ 'args' ] );
         $d->Indent( 0 );
+        $d->Sortkeys( 1 );
+
         my $str_arguments = $d->Dump;
 
         INFO( "Starting job ID \"$mjm_job_id\"..." );
