@@ -1,5 +1,13 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.23   2016-06-02
+    * Make job result (response) queues optional because they fill up
+      RabbitMQ's queue list for clients that don't care about job results.
+    * Remake per-function priorities into per-job priorities (passed as an
+      argument to run_remotely() or add_to_queue()) because they make more
+      sense.
+    * Sort job arguments in job log.
+
 0.22   2016-05-30
     * Add support for RabbitMQ's "lazy queues"
       (https://www.rabbitmq.com/lazy-queues.html, configurable per-function) to
