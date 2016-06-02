@@ -718,7 +718,7 @@ sub _run_job_on_rabbitmq($$$$$)
 
     # Post a job
     eval {
-        my $priority = _priority_to_int( $function_name->priority() );
+        my $rabbitmq_priority = _priority_to_int( $priority );
         $self->_publish_json_message(
             $function_name,
             $payload,
@@ -729,7 +729,7 @@ sub _run_job_on_rabbitmq($$$$$)
             {
                 # Properties
                 delivery_mode  => $RABBITMQ_DELIVERY_MODE_PERSISTENT,
-                priority       => $priority,
+                priority       => $rabbitmq_priority,
                 correlation_id => $celery_job_id,
                 reply_to       => $reply_to_queue,
             }
