@@ -35,6 +35,8 @@ sub main()
         say STDERR "Job result: " . $result;
     }
 
+    # Job doesn't publish results so just add it
+    NinetyNineBottlesOfBeer->add_to_queue( { how_many_bottles => 4 } );
 }
 
 main();
