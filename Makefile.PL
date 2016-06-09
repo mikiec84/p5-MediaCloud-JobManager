@@ -25,7 +25,7 @@ WriteMakefile(
         'Moose'                 => '2.1005',
         'Moose::Role'           => '2.1005',
         'MooseX::Singleton'     => 0,
-        'Net::AMQP::RabbitMQ'   => '1.600000',
+        'Net::AMQP::RabbitMQ'   => '2.100001',
         'Proc::Background'      => 0,
         'Readonly'              => 0,
         'Test::More'            => 0,
