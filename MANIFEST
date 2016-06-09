@@ -2,6 +2,7 @@ Changes
 lib/MediaCloud/JobManager.pm
 lib/MediaCloud/JobManager/Admin.pm
 lib/MediaCloud/JobManager/Broker.pm
+lib/MediaCloud/JobManager/Broker/Null.pm
 lib/MediaCloud/JobManager/Broker/RabbitMQ.pm
 lib/MediaCloud/JobManager/Configuration.pm
 lib/MediaCloud/JobManager/Job.pm
