@@ -33,7 +33,7 @@ any later version of Perl 5 you may have available.
 
 package MediaCloud::JobManager;
 
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 use strict;
 use warnings;
