@@ -33,7 +33,7 @@ any later version of Perl 5 you may have available.
 
 package MediaCloud::JobManager;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use strict;
 use warnings;
@@ -41,7 +41,7 @@ use Modern::Perl "2012";
 
 use MediaCloud::JobManager::Configuration;
 
-use Data::UUID;
+use UUID::Tiny ':std';
 use Digest::SHA qw(sha256_hex);
 use Carp;
 use Readonly;
@@ -133,11 +133,7 @@ sub unique_job_id($$)
       : '';
     my $unique_id = "$function_name($job_args)";
 
-    # Gearman limits the "unique" parameter of a task to 64 bytes (see
-    # GEARMAN_MAX_UNIQUE_SIZE in
-    # https://github.com/sni/gearmand/blob/master/libgearman-1.0/limits.h)
-    # which is usually not enough for most functions, so we hash the
-    # parameter instead
+    # Job broker might limit the length of "unique" parameter
     $unique_id = sha256_hex( $unique_id );
 
     return $unique_id;
@@ -149,9 +145,7 @@ sub unique_job_id($$)
 # Parameters:
 # * function name, e.g. 'NinetyNineBottlesOfBeer'
 # * hashref of job arguments, e.g. "{ 'how_many_bottles' => 13 }"
-# * (optional) Job ID, e.g.:
-#     * "H:tundra.home:18" (as reported by an instance of Gearman::Client), or
-#     * "127.0.0.1:4730//H:tundra.home:18" (as reported by gearmand)
+# * (optional) Job ID, e.g. "H:tundra.home:18" or "127.0.0.1:4730//H:tundra.home:18"
 #
 # Returns: unique job ID, e.g.:
 # * "084567C4146F11E38F00CB951DB7256D.NinetyNineBottlesOfBeer(how_many_bottles_=_2000)", or
@@ -188,9 +182,8 @@ sub _unique_path_job_id($$;$)
         # The job's output still has to be logged somewhere, so we generate an
         # UUID to serve in place of job ID.
 
-        my $ug   = new Data::UUID;
-        my $uuid = $ug->create_str();    # e.g. "059303A4-F3F1-11E2-9246-FB1713B42706"
-        $uuid =~ s/\-//gs;               # e.g. "059303A4F3F111E29246FB1713B42706"
+        my $uuid = uc( create_uuid_as_string( UUID_RANDOM ) );
+        $uuid =~ s/\-//gs;
 
         $unique_id = $uuid;
     }

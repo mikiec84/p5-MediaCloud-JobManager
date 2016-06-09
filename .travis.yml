@@ -10,16 +10,10 @@ addons:
         - jobscheduler.local
     apt:
         # Whitelist: https://github.com/travis-ci/apt-source-whitelist
-        sources:
-            # We need an up-to-date version of Gearman
-            - gearman-developers
+        # sources:
+
         # Whitelist: https://github.com/travis-ci/apt-package-whitelist
         packages:
-            - gearman
-            - gearman-job-server
-            - gearman-tools
-            - libgearman-dev
-            - libgearman7
             - rabbitmq-server
 before_install:
     # Start RabbitMQ

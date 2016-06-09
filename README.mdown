@@ -7,7 +7,6 @@
 ## Features
 
 * Job brokers supported:
-    * [Gearman](http://gearman.org/)
     * [RabbitMQ](https://www.rabbitmq.com/) using [Celery's](http://www.celeryproject.org/) protocol
 * Automattic worker logging via [Log::Log4perl](http://search.cpan.org/~mschilli/Log-Log4perl/)
 * Restarting failed jobs
