@@ -13,7 +13,6 @@ WriteMakefile(
         'App::githook_perltidy' => '0.10.2',
         'Carp'                  => 0,
         'Data::Dumper'          => 0,
-        'Data::UUID'            => 0,
         'DateTime'              => 0,
         'File::Slurp'           => 0,
         'File::Temp'            => 0,

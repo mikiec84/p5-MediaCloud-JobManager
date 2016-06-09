@@ -41,7 +41,7 @@ use Modern::Perl "2012";
 
 use MediaCloud::JobManager::Configuration;
 
-use Data::UUID;
+use UUID::Tiny ':std';
 use Digest::SHA qw(sha256_hex);
 use Carp;
 use Readonly;
@@ -182,9 +182,8 @@ sub _unique_path_job_id($$;$)
         # The job's output still has to be logged somewhere, so we generate an
         # UUID to serve in place of job ID.
 
-        my $ug   = new Data::UUID;
-        my $uuid = $ug->create_str();    # e.g. "059303A4-F3F1-11E2-9246-FB1713B42706"
-        $uuid =~ s/\-//gs;               # e.g. "059303A4F3F111E29246FB1713B42706"
+        my $uuid = uc( create_uuid_as_string( UUID_RANDOM ) );
+        $uuid =~ s/\-//gs;
 
         $unique_id = $uuid;
     }
