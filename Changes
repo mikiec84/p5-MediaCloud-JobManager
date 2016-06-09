@@ -1,5 +1,8 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.25   2016-06-09
+    * Fix broker initialization problem.
+
 0.24   2016-06-09
     * Remove Gearman support.
     * Remove obsolete dependencies.
