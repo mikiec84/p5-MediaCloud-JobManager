@@ -1,8 +1,8 @@
-use lib qw|lib/ t/lib/ t/lib/Gearman/|;
+use lib qw|lib/ t/lib/|;
 
 use Test::More;
 
-# skip import because we might want to skip this unit test if no gearmand is running
+# skip import because we might want to skip this unit test if no job broker is running
 use Test::NoWarnings ();
 
 use Proc::Background;

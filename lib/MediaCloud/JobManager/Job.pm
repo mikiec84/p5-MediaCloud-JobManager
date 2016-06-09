@@ -124,8 +124,6 @@ Returns true if the job queue is expected to grow very large so RabbitMQ should
 create a "lazy" queue (https://www.rabbitmq.com/lazy-queues.html) for this type
 of job.
 
-This helper does nothing when Gearman job broker is being used.
-
 Default implementation of this subroutine returns 0 ("default" type of queue).
 
 =cut
@@ -450,15 +448,6 @@ sub run_remotely($;$$)
     return $config->{ broker }->run_job_sync( $function_name, $args, $priority );
 }
 
-sub run_on_gearman
-{
-    my $class = shift;
-
-    warn 'run_on_gearman() is deprecated, use run_remotely() instead.';
-
-    return $class->run_remotely( @_ );
-}
-
 =head2 (static) C<$class-E<gt>add_to_queue([$args, $config])>
 
 Add to queue remotely, do not wait for the task to complete, return
@@ -501,15 +490,6 @@ sub add_to_queue($;$$)
     }
 
     return $config->{ broker }->run_job_async( $function_name, $args, $priority );
-}
-
-sub enqueue_on_gearman
-{
-    my $class = shift;
-
-    warn 'enqueue_on_gearman() is deprecated, use add_to_queue() instead.';
-
-    return $class->add_to_queue( @_ );
 }
 
 =head2 (static) C<name()>
