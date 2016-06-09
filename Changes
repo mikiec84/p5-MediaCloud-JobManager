@@ -1,5 +1,10 @@
 Revision history for Perl module MediaCloud::JobManager (ex. Gearman::JobScheduler)
 
+0.24   2016-06-09
+    * Remove Gearman support.
+    * Remove obsolete dependencies.
+    * Upgrade Net::AMQP::RabbitMQ.
+
 0.23   2016-06-02
     * Make job result (response) queues optional because they fill up
       RabbitMQ's queue list for clients that don't care about job results.
