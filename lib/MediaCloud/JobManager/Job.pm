@@ -32,13 +32,10 @@ use Moose::Role 2.1005;
 use MediaCloud::JobManager;    # helper subroutines
 use MediaCloud::JobManager::Configuration;
 
-use IO::File;
-use Capture::Tiny ':all';
 use Time::HiRes;
 use Data::Dumper;
 use DateTime;
 use Readonly;
-use Sys::Hostname;
 
 # used for capturing STDOUT and STDERR output of each job and timestamping it;
 # initialized before each job
