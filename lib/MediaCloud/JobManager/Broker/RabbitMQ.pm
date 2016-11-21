@@ -40,6 +40,9 @@ use MediaCloud::JobManager::Job;
 # RabbitMQ default timeout
 Readonly my $RABBITMQ_DEFAULT_TIMEOUT => 60;
 
+# Default amount of retries to try connecting to RabbitMQ to
+Readonly my $RABBITMQ_DEFAULT_RETRIES => 60;
+
 # RabbitMQ delivery modes
 Readonly my $RABBITMQ_DELIVERY_MODE_NONPERSISTENT => 1;
 Readonly my $RABBITMQ_DELIVERY_MODE_PERSISTENT    => 2;
@@ -65,6 +68,7 @@ has '_username' => ( is => 'rw', isa => 'Str' );
 has '_password' => ( is => 'rw', isa => 'Str' );
 has '_vhost'    => ( is => 'rw', isa => 'Str' );
 has '_timeout'  => ( is => 'rw', isa => 'Int' );
+has '_retries'  => ( is => 'rw', isa => 'Int' );
 
 # RabbitMQ connection pool for every connection ID (PID + credentials)
 my %_rabbitmq_connection_for_connection_id;
@@ -106,6 +110,7 @@ sub BUILD
     my $default_vhost = '/';
     $self->_vhost( $args->{ vhost }     // $default_vhost );
     $self->_timeout( $args->{ timeout } // $RABBITMQ_DEFAULT_TIMEOUT );
+    $self->_retries( $args->{ retries } // $RABBITMQ_DEFAULT_RETRIES );
 
     # Connect to the current connection ID (PID + credentials)
     my $mq = $self->_mq();
@@ -120,8 +125,11 @@ sub _connection_identifier($)
     # Reconnect when running on a fork too
     my $pid = $$;
 
-    return sprintf( 'PID=%d; hostname=%s; port=%d; username: %s; password=%s; vhost=%s, timeout=%d',
-        $pid, $self->_hostname, $self->_port, $self->_username, $self->_password, $self->_vhost, $self->_timeout );
+    return sprintf(
+        'PID=%d; hostname=%s; port=%d; username: %s; password=%s; vhost=%s, timeout=%d, retries=%d',
+        $pid,             $self->_hostname, $self->_port,    $self->_username,
+        $self->_password, $self->_vhost,    $self->_timeout, $self->_retries
+    );
 }
 
 # Returns RabbitMQ connection handler for the current connection ID
@@ -142,7 +150,7 @@ sub _mq($)
         my $mq;
         my $connected = 0;
         my $last_error_message;
-        for ( my $retry = 0 ; $retry < 60 ; ++$retry )
+        for ( my $retry = 0 ; $retry < $self->_retries ; ++$retry )
         {
             eval {
                 if ( $retry > 0 )
